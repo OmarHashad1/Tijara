@@ -1,28 +1,32 @@
-import { ParseIntPipe } from '@nestjs/common';
 import {
+  IsDate,
   IsEmail,
-  IsNumber,
-  IsPositive,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
   IsString,
   IsStrongPassword,
-  Max,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
+import { IsMatch, MatchFields } from 'src/decorators/match.decorator';
+import { PROVIDER } from 'src/enums';
 
-export class SingupDto {
+export class SignupDto {
+  @IsNotEmpty()
   @IsString()
   @MinLength(3)
   @MaxLength(16)
   firstName!: string;
 
+  @IsNotEmpty()
   @IsString()
   @MinLength(3)
   @MaxLength(16)
   lastName!: string;
 
-  @IsEmail({})
+  @IsNotEmpty()
+  @IsEmail()
   email!: string;
 
   @IsStrongPassword({
@@ -31,11 +35,18 @@ export class SingupDto {
     minSymbols: 1,
     minUppercase: 1,
   })
+  @IsNotEmpty()
   password!: string;
 
-  @IsNumber()
-  @IsPositive()
-  @Min(16)
-  @Max(95)
-  age!: number;
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @IsDate()
+  @IsOptional()
+  DOB?: Date;
+
+  @IsOptional()
+  @IsEnum([PROVIDER.GOOGLE, PROVIDER.SYSTEM])
+  provider?: PROVIDER;
 }

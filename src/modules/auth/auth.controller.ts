@@ -1,40 +1,54 @@
 import {
-  BadRequestException,
   Body,
+  ConflictException,
   Controller,
-  HttpStatus,
-  ParseIntPipe,
   Post,
+  Req,
   Res,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { type Response as expressResponse } from 'express';
 import { LoginDto } from './dto/login.dto';
-import { SingupDto } from './dto/signup.dto';
+import { SignupDto } from './dto/signup.dto';
+import { type Response, type Request } from 'express';
+import {
+  ACCESS_COOKIE_OPTION,
+  REFRESH_COOKIE_OPTION,
+} from 'src/configs/cookie.config';
+
 @Controller('auth')
+
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('/login')
-  login(
-    @Res({ passthrough: true }) res: expressResponse,
-    @Body(
-      new ValidationPipe({
-        stopAtFirstError: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    )
+  async login(
+    @Req() req: Request,
+
+    @Body()
     dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    this.authService.login();
-    res.status(HttpStatus.OK).json({ message: dto });
+    try {
+      const { accessToken, refreshToken } = await this.authService.login(
+        dto as LoginDto,
+      );
+
+      res.cookie('accessToken', accessToken, ACCESS_COOKIE_OPTION);
+      res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTION);
+      return {
+        message: 'Logged in successfully!',
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 
   @Post('/signup')
-  signup(
-    @Body("age", ParseIntPipe)age:number,
+  async signup(
+    @Req() req: Request,
     @Body(
       new ValidationPipe({
         stopAtFirstError: true,
@@ -42,9 +56,16 @@ export class AuthController {
         forbidNonWhitelisted: true,
       }),
     )
-    dto: SingupDto,
-    @Res({ passthrough: true }) res: expressResponse,
+    dto: SignupDto,
   ) {
-    res.status(HttpStatus.CREATED).json(dto);
+    try {
+      const payload = await this.authService.signup(dto as SignupDto);
+      return { message: 'User created successfully', payload };
+    } catch (err: any) {
+      if (err?.code === 11000)
+        throw new ConflictException('Email already in use');
+
+      throw err;
+    }
   }
 }
