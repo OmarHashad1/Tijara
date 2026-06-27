@@ -1,0 +1,5 @@
+export * from './auth.decorator';
+export * from './match.decorator';
+export * from './role.decorator';
+export * from './token.decorator';
+export * from './user.decorator';

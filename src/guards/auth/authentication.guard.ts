@@ -8,14 +8,12 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { type Request } from 'express';
-import { FlattenMaps } from 'mongoose';
 import { TokenService } from 'src/common/services/token';
 import { USER_STATUS } from 'src/enums';
 import { TOKEN_TYPE } from 'src/enums/auth.enums';
 import { UserRepo } from 'src/repositories';
-import { IDecodedToken, IUser } from 'src/types';
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthenticationGuard implements CanActivate {
   constructor(
     private readonly tokenService: TokenService,
     private readonly userRepo: UserRepo,
@@ -40,7 +38,6 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    console.log(type);
     const decoded = await this.tokenService.decodeToken({
       token,
       type,
