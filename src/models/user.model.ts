@@ -6,14 +6,14 @@ import {
   Virtual,
 } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { SecurityService } from 'src/services/security';
-import { PAYMENT_METHOD, ROLE, USER_STATUS } from 'src/enums';
+import { SecurityService } from 'src/common/services/security';
+import { PAYMENT_METHOD, ROLE, USER_STATUS } from 'src/common/enums';
 
 import type {
   IUser,
   IUserAddress,
   IUseraPayment,
-} from 'src/types';
+} from 'src/common/types';
 
 export type UserDocument = HydratedDocument<IUser>;
 

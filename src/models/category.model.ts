@@ -5,9 +5,9 @@ import {
   SchemaFactory,
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { CATEGORY_STATUS } from 'src/enums';
+import { CATEGORY_STATUS } from 'src/common/enums';
 
-import type { ICategory } from 'src/types';
+import type { ICategory } from 'src/common/types';
 
 export type CategoryDocument = HydratedDocument<ICategory>;
 

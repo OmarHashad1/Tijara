@@ -5,9 +5,9 @@ import {
   SchemaFactory,
 } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { DISCOUNT_TYPE } from 'src/enums';
+import { DISCOUNT_TYPE } from 'src/common/enums';
 
-import type { ICoupon } from 'src/types';
+import type { ICoupon } from 'src/common/types';
 
 export type CouponDocument = HydratedDocument<ICoupon>;
 

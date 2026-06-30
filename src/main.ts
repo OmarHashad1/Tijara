@@ -4,7 +4,7 @@ import { PORT, CLIENT_URL } from './configs';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { ResponseInterceptor, TimeoutInterceptor } from './interceptors';
+import { ResponseInterceptor, TimeoutInterceptor } from './common/interceptors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

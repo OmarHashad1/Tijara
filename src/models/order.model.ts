@@ -5,9 +5,9 @@ import {
   SchemaFactory,
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { ORDER_STATUS } from 'src/enums';
+import { ORDER_STATUS } from 'src/common/enums';
 
-import type { IOrder, IOrderItem } from 'src/types';
+import type { IOrder, IOrderItem } from 'src/common/types';
 
 export type OrderDocument = HydratedDocument<IOrder>;
 

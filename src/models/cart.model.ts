@@ -6,7 +6,7 @@ import {
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-import type { ICart, ICartItem } from 'src/types';
+import type { ICart, ICartItem } from 'src/common/types';
 
 export type CartDocument = HydratedDocument<ICart>;
 

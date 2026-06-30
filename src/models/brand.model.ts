@@ -6,7 +6,7 @@ import {
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-import type { IBrand } from 'src/types';
+import type { IBrand } from 'src/common/types';
 
 export type BrandDocument = HydratedDocument<IBrand>;
 

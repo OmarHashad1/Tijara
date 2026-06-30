@@ -5,9 +5,9 @@ import {
   SchemaFactory,
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { PAYMENT_PROVIDER, PAYMENT_STATUS } from 'src/enums';
+import { PAYMENT_PROVIDER, PAYMENT_STATUS } from 'src/common/enums';
 
-import type { IPayment } from 'src/types';
+import type { IPayment } from 'src/common/types';
 
 export type PaymentDocument = HydratedDocument<IPayment>;
 

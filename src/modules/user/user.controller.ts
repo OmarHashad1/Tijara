@@ -1,17 +1,21 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ROLE } from 'src/enums';
-import { Auth } from 'src/decorators';
-import { User } from 'src/decorators';
-import { type IUser } from 'src/types';
+import { ROLE } from 'src/common/enums';
+import { Auth } from 'src/common/decorators';
+import { User } from 'src/common/decorators';
+import { type IUser } from 'src/common/types';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { uploadPhoto } from 'src/utils/multer.util';
+import { uploadPhoto } from 'src/common/utils/multer.util';
+import { type Request } from 'express';
+import { LogoutDto } from './dto/logout.dto';
 
 @Controller('user')
 @Auth([ROLE.USER])
@@ -23,6 +27,16 @@ export class UserController {
       message: 'User profile fetched successfully',
       data: user,
     };
+  }
+
+  @Post('/logout')
+  async logout(@Req() req: Request, @Body() dto: LogoutDto) {
+    try {
+      const { user, decoded } = req.credentials;
+      await this.userService.logout({ type: dto.type, user, decoded });
+    } catch (err) {
+      throw err;
+    }
   }
 
   @Post('/upload-file')

@@ -1,7 +1,7 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-import type { IProduct } from 'src/types';
+import type { IProduct } from 'src/common/types';
 
 export type ProductDocument = HydratedDocument<IProduct>;
 

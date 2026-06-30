@@ -6,7 +6,7 @@ import {
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-import type { IWishlist } from 'src/types';
+import type { IWishlist } from 'src/common/types';
 
 export type WishlistDocument = HydratedDocument<IWishlist>;
 

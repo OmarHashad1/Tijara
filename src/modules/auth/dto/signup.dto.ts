@@ -9,8 +9,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { IsMatch, MatchFields } from 'src/decorators/match.decorator';
-import { PROVIDER } from 'src/enums';
+import { IsMatch, MatchFields } from 'src/common/decorators/match.decorator';
 
 export class SignupDto {
   @IsNotEmpty()
@@ -41,12 +40,4 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   phoneNumber?: string;
-
-  @IsDate()
-  @IsOptional()
-  DOB?: Date;
-
-  @IsOptional()
-  @IsEnum([PROVIDER.GOOGLE, PROVIDER.SYSTEM])
-  provider?: PROVIDER;
 }
