@@ -1,22 +1,20 @@
 export enum ROLE {
-  USER = "user",
-  COMPANY = "company",
-  ADMIN = "admin",
+  USER = 'user',
+  ADMIN = 'admin',
 }
-
-export enum PROVIDER {
-  SYSTEM = "system",
-  GOOGLE = "google",
-}
-
 
 export enum USER_STATUS {
-  ACTIVE = "active",
-  DEACTIVATED = "deativated",
-  BANNED = "BANNED",
+  ACTIVE = 'active',
+  DEACTIVATED = 'deativated',
+  BANNED = 'BANNED',
 }
 
 export enum LOGOUT_TYPE {
-  ALL = "all",
-  DEVICE = "device",
+  ALL = 'all',
+  DEVICE = 'device',
+}
+
+export enum PAYMENT_METHOD {
+  CARD = 'card',
+  POD = 'POD',
 }

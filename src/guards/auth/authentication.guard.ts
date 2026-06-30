@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { type Request } from 'express';
-import { TokenService } from 'src/common/services/token';
+import { TokenService } from 'src/services/token';
 import { USER_STATUS } from 'src/enums';
-import { TOKEN_TYPE } from 'src/enums/auth.enums';
+import { TOKEN_TYPE } from 'src/enums/auth.enum';
 import { UserRepo } from 'src/repositories';
 @Injectable()
 export class AuthenticationGuard implements CanActivate {

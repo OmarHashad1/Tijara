@@ -14,7 +14,7 @@ import {
 import { ROLE } from 'src/enums';
 import { UserRepo } from 'src/repositories';
 import { nanoid } from 'nanoid';
-import { TOKEN_TYPE } from 'src/enums/auth.enums';
+import { TOKEN_TYPE } from 'src/enums/auth.enum';
 @Injectable()
 export class TokenService {
   constructor(

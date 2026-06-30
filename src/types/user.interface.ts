@@ -1,9 +1,21 @@
 import { Document, Types } from 'mongoose';
-import { ROLE } from 'src/enums';
+import { PAYMENT_METHOD, ROLE } from 'src/enums';
 
 export interface IUserLocation {
   city?: string | null;
   country?: string | null;
+}
+
+export interface IUserAddress {
+  city: string;
+  country: string;
+  isDefault: boolean;
+}
+
+export interface IUseraPayment {
+  method: PAYMENT_METHOD;
+  last4: number;
+  isDefault: boolean;
 }
 
 export interface IUser {
@@ -12,19 +24,16 @@ export interface IUser {
   email: string;
   password: string | null;
   oldPasswords: string[];
-  googleId: string | null;
-  provider: string;
   role: ROLE;
-  DOB: Date;
-  age: number | null;
-  avatar?: string | null;
   phoneNumber?: string | null;
-  location?: IUserLocation | null;
   isEmailVerified: boolean;
   status: string;
   credentialsChangedAt: Date | null;
   createdAt?: Date;
+  addresses?: IUserAddress[] | null;
+  paymentsMethod?: IUseraPayment[] | null;
   updatedAt?: Date;
   deletedAt: Date | null;
+  restoredAt: Date | null;
   username?: string;
 }

@@ -1,11 +1,17 @@
-import { Controller, Get, Req, SetMetadata, UseGuards } from '@nestjs/common';
-import { type Request } from 'express';
+import {
+  Controller,
+  Get,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { ROLE } from 'src/enums';
 import { Auth } from 'src/decorators';
 import { User } from 'src/decorators';
 import { type IUser } from 'src/types';
-import { delay, of } from 'rxjs';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { uploadPhoto } from 'src/utils/multer.util';
 
 @Controller('user')
 @Auth([ROLE.USER])
@@ -17,5 +23,11 @@ export class UserController {
       message: 'User profile fetched successfully',
       data: user,
     };
+  }
+
+  @Post('/upload-file')
+  @UseInterceptors(FileInterceptor('photo', uploadPhoto))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.log(file);
   }
 }

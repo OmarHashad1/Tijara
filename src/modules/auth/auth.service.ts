@@ -10,8 +10,8 @@ import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { UserRepo } from 'src/repositories';
 import { ROLE } from 'src/enums';
-import { TokenService } from 'src/common/services/token';
-import { SecurityService } from 'src/common/services/security';
+import { TokenService } from 'src/services/token';
+import { SecurityService } from 'src/services/security';
 
 @Injectable()
 export class AuthService {

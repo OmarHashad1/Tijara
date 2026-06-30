@@ -6,10 +6,14 @@ import {
   Virtual,
 } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { SecurityService } from 'src/common/services/security';
-import { PROVIDER, ROLE, USER_STATUS } from 'src/enums';
+import { SecurityService } from 'src/services/security';
+import { PAYMENT_METHOD, ROLE, USER_STATUS } from 'src/enums';
 
-import type { IUser, IUserLocation } from 'src/types';
+import type {
+  IUser,
+  IUserAddress,
+  IUseraPayment,
+} from 'src/types';
 
 export type UserDocument = HydratedDocument<IUser>;
 
@@ -58,34 +62,16 @@ export class User implements IUser {
   })
   email!: string;
 
-  @Prop({ type: Date, default: null })
-  DOB!: Date;
-
-  @Prop({ type: Number, default: null })
-  age!: number;
-
   @Prop({
     type: String,
     select: false,
-    required: function (this: IUser) {
-      return this.provider === PROVIDER.SYSTEM;
-    },
+
     default: null,
   })
   password!: string | null;
 
   @Prop({ type: [String], default: [], select: false })
   oldPasswords!: string[];
-
-  @Prop({
-    type: String,
-    select: false,
-    required: function (this: IUser) {
-      return this.provider === PROVIDER.GOOGLE;
-    },
-    default: null,
-  })
-  googleId!: string | null;
 
   @Prop({ type: String, default: ROLE.USER, enum: [...Object.values(ROLE)] })
   role!: ROLE;
@@ -94,27 +80,30 @@ export class User implements IUser {
     type: String,
     unique: true,
     sparse: true,
-    required: function (this: IUser) {
-      return this.provider === PROVIDER.SYSTEM;
-    },
   })
   phoneNumber?: string | null;
 
   @Prop({
-    type: String,
-    default: PROVIDER.SYSTEM,
-    enum: [...Object.values(PROVIDER)],
+    type: [
+      {
+        city: String,
+        country: String,
+        isDefault: Boolean,
+      },
+    ],
   })
-  provider!: PROVIDER;
+  addresses?: IUserAddress[] | null | undefined;
 
   @Prop({
-    type: {
-      city: { type: String, default: null },
-      country: { type: String, default: null },
-    },
+    type: [
+      {
+        method: { type: { enum: [...Object.values(PAYMENT_METHOD)] } },
+        last4: Number,
+        isDefault: Boolean,
+      },
+    ],
   })
-  location!: IUserLocation | null;
-
+  paymentsMethod?: IUseraPayment[] | null | undefined;
   @Prop({
     type: String,
     enum: [...Object.values(USER_STATUS)],
@@ -135,6 +124,11 @@ export class User implements IUser {
     type: Date,
   })
   deletedAt!: Date | null;
+
+  @Prop({
+    type: Date,
+  })
+  restoredAt!: Date | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

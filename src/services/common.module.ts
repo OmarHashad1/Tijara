@@ -4,11 +4,18 @@ import { RedisService } from './redis';
 import { EmailService } from './email';
 import { JwtModule } from '@nestjs/jwt';
 import { TokenService } from './token';
+import { S3Service } from './aws';
 
 @Global()
 @Module({
   imports: [JwtModule],
   exports: [SecurityService, RedisService, EmailService, TokenService],
-  providers: [SecurityService, RedisService, EmailService, TokenService],
+  providers: [
+    SecurityService,
+    RedisService,
+    EmailService,
+    TokenService,
+    S3Service,
+  ],
 })
 export class CommonModule {}

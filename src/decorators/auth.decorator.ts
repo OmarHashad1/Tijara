@@ -2,7 +2,7 @@ import { applyDecorators, UseGuards } from '@nestjs/common';
 import { Role } from 'src/decorators/role.decorator';
 import { Token } from 'src/decorators/token.decorator';
 import { ROLE } from 'src/enums';
-import { TOKEN_TYPE } from 'src/enums/auth.enums';
+import { TOKEN_TYPE } from 'src/enums/auth.enum';
 import { AuthenticationGuard } from '../guards/auth/authentication.guard';
 import { AuthorizationGuard } from '../guards/auth/authorization.guard';
 
