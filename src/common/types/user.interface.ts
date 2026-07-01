@@ -35,5 +35,7 @@ export interface IUser {
   updatedAt?: Date;
   deletedAt: Date | null;
   restoredAt: Date | null;
+  banReason?: string | null;
   username?: string;
+  _id?: Types.ObjectId;
 }

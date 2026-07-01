@@ -120,6 +120,9 @@ export class User implements IUser {
   @Prop({ type: Date, default: null })
   credentialsChangedAt!: Date | null;
 
+  @Prop({ type: String, default: null })
+  banReason?: string | null;
+
   @Prop({
     type: Date,
   })

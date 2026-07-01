@@ -8,6 +8,9 @@ import { CommonModule } from './common/services';
 import { validateEnv } from './common/utils/env.utils';
 import tokenConfig from './configs/token.config';
 import { UserModule } from './modules/user/user.module';
+import { CustomerModule } from './modules/user/customer/customer.module';
+import { AdminModule } from './modules/user/admin/admin.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +22,8 @@ import { UserModule } from './modules/user/user.module';
     CommonModule,
     AuthModule,
     DatabaseModule,
-    UserModule,
+    CustomerModule,
+    AdminModule,
   ],
 
   controllers: [AppController],
