@@ -1,32 +1,115 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Patch,
   Post,
   Req,
-  UploadedFile,
-  UseInterceptors,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { UserService } from './user.service';
 import { ROLE } from 'src/common/enums';
 import { Auth } from 'src/common/decorators';
 import { User } from 'src/common/decorators';
 import { type IUser } from 'src/common/types';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { uploadPhoto } from 'src/common/utils/multer.util';
 import { type Request } from 'express';
 import { LogoutDto } from './dto/logout.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { AddAddressDto } from './dto/add-address.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
+import { AddPaymentMethodDto } from './dto/add-payment-method.dto';
+import { type UserDocument } from 'src/models';
 
 @Controller('user')
 @Auth([ROLE.USER])
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
   @Get('/me')
   profile(@User() user: IUser) {
     return {
       message: 'User profile fetched successfully',
       data: user,
     };
+  }
+
+  @Patch('/me')
+  async updateProfile(
+    @User() user: UserDocument,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    await this.userService.updateProfile(user._id, dto);
+    return { message: 'Profile updated successfully' };
+  }
+
+  @Patch('/me/password')
+  async changePassword(
+    @User() user: UserDocument,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    await this.userService.changePassword(user._id, dto);
+    return { message: 'Password changed successfully' };
+  }
+
+  @Get('/me/addresses')
+  async getAddresses(@User() user: UserDocument) {
+    const addresses = await this.userService.getAddresses(user._id);
+    return { message: 'Addresses fetched successfully', data: addresses };
+  }
+
+  @Post('/me/addresses')
+  async addAddress(
+    @User() user: UserDocument,
+    @Body() dto: AddAddressDto,
+  ) {
+    await this.userService.addAddress(user._id, dto);
+    return { message: 'Address added successfully' };
+  }
+
+  @Patch('/me/addresses/:id')
+  async updateAddress(
+    @User() user: UserDocument,
+    @Param('id') id: string,
+    @Body() dto: UpdateAddressDto,
+  ) {
+    await this.userService.updateAddress(user._id, new Types.ObjectId(id), dto);
+    return { message: 'Address updated successfully' };
+  }
+
+  @Delete('/me/addresses/:id')
+  async deleteAddress(
+    @User() user: UserDocument,
+    @Param('id') id: string,
+  ) {
+    await this.userService.deleteAddress(user._id, new Types.ObjectId(id));
+    return { message: 'Address deleted successfully' };
+  }
+
+  @Get('/me/payment-methods')
+  async getPaymentMethods(@User() user: UserDocument) {
+    const methods = await this.userService.getPaymentMethods(user._id);
+    return { message: 'Payment methods fetched successfully', data: methods };
+  }
+
+  @Post('/me/payment-methods')
+  async addPaymentMethod(
+    @User() user: UserDocument,
+    @Body() dto: AddPaymentMethodDto,
+  ) {
+    await this.userService.addPaymentMethod(user._id, dto);
+    return { message: 'Payment method added successfully' };
+  }
+
+  @Delete('/me/payment-methods/:id')
+  async deletePaymentMethod(
+    @User() user: UserDocument,
+    @Param('id') id: string,
+  ) {
+    await this.userService.deletePaymentMethod(user._id, new Types.ObjectId(id));
+    return { message: 'Payment method removed successfully' };
   }
 
   @Post('/logout')
@@ -37,11 +120,5 @@ export class UserController {
     } catch (err) {
       throw err;
     }
-  }
-
-  @Post('/upload-file')
-  @UseInterceptors(FileInterceptor('photo', uploadPhoto))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
   }
 }

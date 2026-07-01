@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { PAYMENT_METHOD, ROLE } from 'src/common/enums';
 
 export interface IUserLocation {

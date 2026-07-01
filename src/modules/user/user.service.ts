@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { UserDocument } from 'src/models';
 import { UserRepo } from 'src/common/repositories';
 import { RedisService } from 'src/common/services/redis';
+import { SecurityService } from 'src/common/services/security';
 import { IDecodedToken, IUser, LOGOUT_TYPE } from 'src/common/types';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { AddAddressDto } from './dto/add-address.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
+import { AddPaymentMethodDto } from './dto/add-payment-method.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly redisService: RedisService,
     private readonly userRepo: UserRepo,
+    private readonly securityService: SecurityService,
   ) {}
   async logout({
     type,
@@ -49,5 +56,126 @@ export class UserService {
         throw new Error('Invalid Logout Type');
       }
     }
+  }
+
+  async updateProfile(userId: Types.ObjectId, dto: UpdateProfileDto) {
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: { $set: dto },
+    });
+  }
+
+  async getAddresses(userId: Types.ObjectId) {
+    const user = await this.userRepo.findOne({
+      filter: { _id: userId },
+      projection: { addresses: 1 },
+      options: { lean: true },
+    });
+    return user?.addresses ?? [];
+  }
+
+  async addAddress(userId: Types.ObjectId, dto: AddAddressDto) {
+    if (dto.isDefault) {
+      await this.userRepo.updateOne({
+        filter: { _id: userId },
+        update: { $set: { 'addresses.$[].isDefault': false } },
+      });
+    }
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: { $push: { addresses: dto } },
+    });
+  }
+
+  async updateAddress(
+    userId: Types.ObjectId,
+    addressId: Types.ObjectId,
+    dto: UpdateAddressDto,
+  ) {
+    if (dto.isDefault) {
+      await this.userRepo.updateOne({
+        filter: { _id: userId },
+        update: { $set: { 'addresses.$[].isDefault': false } },
+      });
+    }
+
+    await this.userRepo.updateOne({
+      filter: { _id: userId._id },
+      update: {
+        $set: {
+          ...(dto.city && { 'addresses.$.city': dto.city }),
+          ...(dto.country && { 'addresses.$.country': dto.country }),
+          ...(dto.isDefault && { 'addresses.$.isDefault': dto.isDefault }),
+        },
+      },
+    });
+  }
+
+  async deleteAddress(userId: Types.ObjectId, addressId: Types.ObjectId) {
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: { $pull: { addresses: { _id: addressId } } },
+    });
+  }
+
+  async getPaymentMethods(userId: Types.ObjectId) {
+    const user = await this.userRepo.findOne({
+      filter: { _id: userId },
+      projection: { paymentsMethod: 1 },
+      options: { lean: true },
+    });
+    return user?.paymentsMethod ?? [];
+  }
+
+  async addPaymentMethod(userId: Types.ObjectId, dto: AddPaymentMethodDto) {
+    if (dto.isDefault) {
+      await this.userRepo.updateOne({
+        filter: { _id: userId },
+        update: { $set: { 'paymentsMethod.$[].isDefault': false } },
+      });
+    }
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: { $push: { paymentsMethod: dto } },
+    });
+  }
+
+  async deletePaymentMethod(userId: Types.ObjectId, paymentId: Types.ObjectId) {
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: { $pull: { paymentsMethod: { _id: paymentId } } },
+    });
+  }
+
+  async changePassword(userId: Types.ObjectId, dto: ChangePasswordDto) {
+    const user = await this.userRepo.findOne({
+      filter: { _id: userId },
+      projection: { password: 1, oldPasswords: 1 },
+      options: { lean: true },
+    });
+
+    if (
+      !user?.password ||
+      !(await this.securityService.verify(user.password, dto.oldPassword))
+    ) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    for (const old of user.oldPasswords ?? []) {
+      if (await this.securityService.verify(old, dto.newPassword)) {
+        throw new BadRequestException('Password was used before');
+      }
+    }
+
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: {
+        $set: {
+          password: await this.securityService.hash(dto.newPassword),
+          credentialsChangedAt: new Date(),
+        },
+        $push: { oldPasswords: user.password },
+      },
+    });
   }
 }

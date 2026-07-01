@@ -3,11 +3,11 @@ import {
   createParamDecorator,
   ExecutionContext,
 } from '@nestjs/common';
-import { IUser } from 'src/common/types';
 import { type Request } from 'express';
+import { UserDocument } from 'src/models';
 export const User = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext) => {
-    let user: IUser;
+    let user: UserDocument;
 
     switch (ctx.getType()) {
       case 'http': {
