@@ -64,3 +64,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 #uploads
 *uploads
 uploads/*
+
+#Documents
+*document
+document/*
