@@ -164,6 +164,14 @@ export class CustomerService {
     });
   }
 
+  async deleteAccount(userId: Types.ObjectId) {
+    const now = new Date();
+    await this.userRepo.updateOne({
+      filter: { _id: userId },
+      update: { $set: { deletedAt: now, credentialsChangedAt: now } },
+    });
+  }
+
   async deletePaymentMethod(
     userId: Types.ObjectId,
     paymentId: Types.ObjectId,

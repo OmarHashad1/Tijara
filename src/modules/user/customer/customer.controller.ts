@@ -110,6 +110,12 @@ export class CustomerController {
     return { message: 'Payment method removed successfully' };
   }
 
+  @Delete('/me')
+  async deleteAccount(@User() user: UserDocument) {
+    await this.customerService.deleteAccount(user._id);
+    return { message: 'Account deleted successfully' };
+  }
+
   @Post('/logout')
   async logout(@Req() req: Request, @Body() dto: LogoutDto) {
     const { user, decoded } = req.credentials;
