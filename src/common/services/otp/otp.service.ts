@@ -75,13 +75,11 @@ export class OtpService {
     if ((JSON.parse(otpRaw as string) as { verified: boolean }).verified) {
       throw new ConflictException('OTP has been verified ');
     }
-    console.log(otpRaw)
     const { hashedOtp, attempts } = JSON.parse(otpRaw as string) as {
       hashedOtp: string;
       attempts: number;
     };
 
-    console.log(hashedOtp, attempts);
     if (!(await this.securityService.verify(hashedOtp, otp))) {
       const newAttempts = attempts + 1;
       if (newAttempts >= 5) {
@@ -122,9 +120,11 @@ export class OtpService {
     if (!otpRaw)
       throw new NotFoundException('No OTP found or code has expired');
 
-    if (!(otpRaw as { verified: boolean }).verified) {
+    if (!JSON.parse(otpRaw as string).verified) {
       throw new ForbiddenException('OTP has not been verified yet');
     }
+
+    await this.redisService.del(otpKey);
 
     return true;
   }

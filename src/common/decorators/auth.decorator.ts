@@ -5,6 +5,7 @@ import { ROLE } from 'src/common/enums';
 import { TOKEN_TYPE } from 'src/common/enums/auth.enum';
 import { AuthenticationGuard } from '../guards/auth/authentication.guard';
 import { AuthorizationGuard } from '../guards/auth/authorization.guard';
+import { EmailVerifiedGuard } from '../guards/email-verified.guard';
 
 export const Auth = (
   roles: ROLE[],
@@ -13,6 +14,6 @@ export const Auth = (
   return applyDecorators(
     Token(tokenTypeVal),
     Role(roles),
-    UseGuards(AuthenticationGuard, AuthorizationGuard),
+    UseGuards(AuthenticationGuard, AuthorizationGuard, EmailVerifiedGuard),
   );
 };

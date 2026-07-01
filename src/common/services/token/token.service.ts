@@ -46,6 +46,7 @@ export class TokenService {
     token,
   }: IVerifyTokenParams) {
     const secret = this.configService.get<string>(`tokens.${role}.${type}`);
+
     if (!secret) {
       throw new InternalServerErrorException('Invalid token or user type');
     }

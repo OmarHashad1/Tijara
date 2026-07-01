@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -23,14 +24,16 @@ import {
 } from 'src/configs/cookie.config';
 import { AuthenticationGuard } from 'src/common/guards/auth';
 import { TOKEN_TYPE } from 'src/common/enums/auth.enum';
-import { Auth } from 'src/common/decorators';
-import { ROLE } from 'src/common/enums';
+import { ForgotPasswordOtp } from './dto/forgotPasswordOtp.dto';
+import { verfiyForgotPasswordOtp } from './dto/verifyForgotPasswordOtp.dto';
+import { ForgotPassword } from './dto/resetPassword.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Req() req: Request,
 
@@ -94,7 +97,7 @@ export class AuthController {
   }
 
   @Post('/send-verify-email')
-  @Auth([ROLE.USER])
+  @UseGuards(AuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async sendVerifyEmailOTP(@Req() req: Request) {
     const { user } = req.credentials;
@@ -109,7 +112,7 @@ export class AuthController {
   }
 
   @Post('/check-verify-email')
-  @Auth([ROLE.USER])
+  @UseGuards(AuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async checkVerifyEmailOTP(
     @Req() req: Request,
@@ -119,5 +122,32 @@ export class AuthController {
     const { user } = req.credentials;
     await this.authService.checkVerifyEmailOTP(user._id, dto.otp);
     return { message: 'Email verified successfully' };
+  }
+
+  @Post('/send-forgot-password-otp')
+  @HttpCode(HttpStatus.OK)
+  async sendForgotPasswordOTP(@Body() dto: ForgotPasswordOtp) {
+    await this.authService.sendForgotPasswordOTP(dto.email);
+    return {
+      message: 'If this email is registered, you will receive a code shortly',
+    };
+  }
+
+  @Post('/verify-forgot-password-otp')
+  @HttpCode(HttpStatus.OK)
+  async verfiyForgotPasswordOtp(@Body() dto: verfiyForgotPasswordOtp) {
+    await this.authService.verifyForgotPasswordOTP(dto.email, dto.otp);
+    return {
+      message: 'OTP has been verified successfully',
+    };
+  }
+
+  @Patch('/reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ForgotPassword) {
+    await this.authService.resetPassword(dto);
+    return {
+      message: 'Password reset successfully',
+    };
   }
 }

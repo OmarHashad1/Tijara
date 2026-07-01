@@ -3,6 +3,7 @@ import { FlattenMaps, Types } from 'mongoose';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { SecurityService } from 'src/common/services/security';
 import { OtpService } from 'src/common/services/otp';
 import { IDecodedToken } from 'src/common/types';
 import { emailEmitter } from 'src/common/events/email.event';
+import { ForgotPassword } from './dto/resetPassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,17 +28,27 @@ export class AuthService {
     private readonly otpService: OtpService,
   ) {}
 
+  private async findUser(email: string) {
+    const user = await this.userRepo.findOne({
+      filter: { email: email },
+      projection: {
+        email: 1,
+        _id: 1,
+        firstName: 1,
+        password: 1,
+        oldPasswords: 1,
+      },
+      options: { lean: false },
+    });
+    return user;
+  }
+
   async login(dto: LoginDto) {
     const user = await this.userRepo.findOne({
       filter: { email: dto.email },
       options: { lean: false },
       projection: { _id: 1, email: 1, role: 1, password: 1 },
     });
-
-    if (!user?.isEmailVerified) {
-      throw new BadRequestException('Email verification is required');
-    }
-
     if (
       !user ||
       !user.password ||
@@ -112,6 +124,46 @@ export class AuthService {
     await this.userRepo.updateOne({
       filter: { _id: userId },
       update: { $set: { isEmailVerified: true } },
+    });
+  }
+
+  async sendForgotPasswordOTP(email: string) {
+    const user = await this.findUser(email);
+    if (!user) return;
+
+    const otp = await this.otpService.send(
+      user._id,
+      EMAIL_EVENTS.FORGOT_PASSWORD,
+    );
+    emailEmitter.emit(EMAIL_EVENTS.FORGOT_PASSWORD, {
+      to: user.email,
+      firstName: user.firstName,
+      otp,
+    });
+  }
+  async verifyForgotPasswordOTP(email: string, otp: string) {
+    const user = await this.findUser(email);
+    if (!user) return;
+    await this.otpService.verify(user._id, EMAIL_EVENTS.FORGOT_PASSWORD, otp);
+  }
+
+  async resetPassword(dto: ForgotPassword) {
+    const user = await this.findUser(dto.email);
+    if (!user) return;
+
+    for (const old of user.oldPasswords ?? []) {
+      if (await this.securityService.verify(old, dto.newPassword))
+        throw new BadRequestException('Password was used before');
+    }
+
+    await this.otpService.consume(user._id, EMAIL_EVENTS.FORGOT_PASSWORD);
+
+    await this.userRepo.updateOne({
+      filter: { _id: user._id, email: dto.email },
+      update: {
+        $set: { password: await this.securityService.hash(dto.newPassword),credentialsChangedAt:new Date() },
+        $push: { oldPasswords: user.password },
+      },
     });
   }
 }

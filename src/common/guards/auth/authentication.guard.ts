@@ -26,10 +26,11 @@ export class AuthenticationGuard implements CanActivate {
     let req: Request;
     let token: string;
 
-    const type = this.reflector.getAllAndOverride<TOKEN_TYPE>('tokenType', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const type =
+      this.reflector.getAllAndOverride<TOKEN_TYPE>('tokenType', [
+        context.getHandler(),
+        context.getClass(),
+      ]) ?? 'access';
 
     switch (context.getType()) {
       case 'http':
@@ -39,6 +40,7 @@ export class AuthenticationGuard implements CanActivate {
             type == TOKEN_TYPE.ACCESS
               ? req.cookies.accessToken
               : req.cookies.refreshToken;
+       
         }
         break;
       default:
@@ -67,7 +69,6 @@ export class AuthenticationGuard implements CanActivate {
     ) {
       throw new BadRequestException('Invalid session. Please login again');
     }
-   
 
     if (user.status === USER_STATUS.BANNED)
       throw new ForbiddenException(

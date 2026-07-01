@@ -102,7 +102,7 @@ export abstract class DatabaseRepo<RawDoc> {
 
   public async find({
     filter,
-    options = { lean: true },
+    options = { lean: false },
     projection,
   }: {
     filter: QueryFilter<RawDoc>;
