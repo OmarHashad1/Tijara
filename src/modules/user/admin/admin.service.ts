@@ -87,6 +87,11 @@ export class AdminService {
       throw new NotFoundException('User not found or already deleted');
   }
 
+  async hardDeleteUser(id: Types.ObjectId) {
+    const result = await this.userRepo.deleteOne({ filter: { _id: id } });
+    if (!result.deletedCount) throw new NotFoundException('User not found');
+  }
+
   async restoreUser(id: Types.ObjectId) {
     const result = await this.userRepo.updateOne({
       filter: { _id: id, deletedAt: { $ne: null } },

@@ -53,6 +53,12 @@ export class AdminController {
     return this.adminService.softDeleteUser(id);
   }
 
+  @Delete(':id/hard')
+  @HttpCode(HttpStatus.OK)
+  hardDeleteUser(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    return this.adminService.hardDeleteUser(id);
+  }
+
   @Patch(':id/restore')
   @HttpCode(HttpStatus.OK)
   restoreUser(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {

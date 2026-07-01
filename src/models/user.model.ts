@@ -193,7 +193,6 @@ export const UserModel = MongooseModule.forFeatureAsync([
       );
 
       schema.pre(['updateOne', 'findOneAndUpdate'], function () {
-        const query = this.getQuery();
         const update = this.getUpdate() as HydratedDocument<IUser>;
         if (update.deletedAt) {
           this.setUpdate({ ...update, $unset: { restoredAt: 1 } });
