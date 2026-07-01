@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
@@ -46,7 +47,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.userRepo.findOne({
       filter: { email: dto.email },
-      options: { lean: false },
+      options: { lean: false, paranoId: false },
       projection: { _id: 1, email: 1, role: 1, password: 1 },
     });
     if (
@@ -54,7 +55,7 @@ export class AuthService {
       !user.password ||
       !(await this.securityService.verify(user.password, dto.password))
     )
-      throw new BadRequestException('wrong email or password');
+      throw new BadRequestException('Wrong email or password');
     const { _id, email, role } = user;
     const token = await this.tokenService.generateToken({
       payload: { _id, email, role },
@@ -149,7 +150,7 @@ export class AuthService {
 
   async resetPassword(dto: ForgotPassword) {
     const user = await this.findUser(dto.email);
-    if (!user) return;
+    if (!user) throw new NotFoundException('User not found');
 
     for (const old of user.oldPasswords ?? []) {
       if (await this.securityService.verify(old, dto.newPassword))
@@ -161,7 +162,10 @@ export class AuthService {
     await this.userRepo.updateOne({
       filter: { _id: user._id, email: dto.email },
       update: {
-        $set: { password: await this.securityService.hash(dto.newPassword),credentialsChangedAt:new Date() },
+        $set: {
+          password: await this.securityService.hash(dto.newPassword),
+          credentialsChangedAt: new Date(),
+        },
         $push: { oldPasswords: user.password },
       },
     });

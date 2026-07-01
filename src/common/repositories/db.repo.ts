@@ -113,6 +113,22 @@ export abstract class DatabaseRepo<RawDoc> {
     return payload;
   }
 
+  public async findOneAndUpdate({
+    filter,
+    update,
+    options = {},
+  }: {
+    filter: QueryFilter<RawDoc>;
+    update: UpdateQuery<RawDoc>;
+    options?: QueryOptions<RawDoc>;
+  }) {
+    return this.model.findOneAndUpdate(
+      filter,
+      { ...update, $inc: { __v: 1 } },
+      options,
+    );
+  }
+
   public async paginate({
     filter,
     options,
@@ -183,7 +199,11 @@ export abstract class DatabaseRepo<RawDoc> {
     update: UpdateQuery<RawDoc>;
     options?: mongo.UpdateOptions & MongooseUpdateQueryOptions<RawDoc>;
   }): Promise<UpdateWriteOpResult> {
-    return this.model.updateOne(filter, update, options);
+    return this.model.updateOne(
+      filter,
+      { ...update, $inc: { __v: 1 } },
+      options,
+    );
   }
 
   public async deleteOne({

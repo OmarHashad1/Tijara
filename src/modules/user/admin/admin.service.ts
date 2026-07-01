@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Types } from 'mongoose';
 import { UserRepo } from 'src/common/repositories';
 import { USER_STATUS, USER_STATUS_TRANSITIONS } from 'src/common/enums';
@@ -36,21 +40,35 @@ export class AdminService {
   }
 
   async banUser(id: Types.ObjectId, dto: BanUserDto) {
-    const user = await this.userRepo.findOne({ filter: { _id: id }, options: { lean: true } });
+    const user = await this.userRepo.findOne({
+      filter: { _id: id },
+      options: { lean: true },
+    });
     if (!user) throw new NotFoundException('User not found');
-    if (!(USER_STATUS_TRANSITIONS.ban as readonly string[]).includes(user.status)) {
+    if (
+      !(USER_STATUS_TRANSITIONS.ban as readonly string[]).includes(user.status)
+    ) {
       throw new BadRequestException('User is already banned');
     }
     await this.userRepo.updateOne({
       filter: { _id: id },
-      update: { $set: { status: USER_STATUS.BANNED, banReason: dto.banReason } },
+      update: {
+        $set: { status: USER_STATUS.BANNED, banReason: dto.banReason },
+      },
     });
   }
 
   async unbanUser(id: Types.ObjectId) {
-    const user = await this.userRepo.findOne({ filter: { _id: id }, options: { lean: true } });
+    const user = await this.userRepo.findOne({
+      filter: { _id: id },
+      options: { lean: true },
+    });
     if (!user) throw new NotFoundException('User not found');
-    if (!(USER_STATUS_TRANSITIONS.unban as readonly string[]).includes(user.status)) {
+    if (
+      !(USER_STATUS_TRANSITIONS.unban as readonly string[]).includes(
+        user.status,
+      )
+    ) {
       throw new BadRequestException('User is not banned');
     }
     await this.userRepo.updateOne({
@@ -60,11 +78,13 @@ export class AdminService {
   }
 
   async softDeleteUser(id: Types.ObjectId) {
+    const now = new Date();
     const result = await this.userRepo.updateOne({
       filter: { _id: id, deletedAt: null },
-      update: { $set: { deletedAt: new Date() } },
+      update: { $set: { deletedAt: now, credentialsChangedAt: now } },
     });
-    if (!result.matchedCount) throw new NotFoundException('User not found or already deleted');
+    if (!result.matchedCount)
+      throw new NotFoundException('User not found or already deleted');
   }
 
   async restoreUser(id: Types.ObjectId) {
@@ -72,6 +92,7 @@ export class AdminService {
       filter: { _id: id, deletedAt: { $ne: null } },
       update: { $set: { deletedAt: null, restoredAt: new Date() } },
     });
-    if (!result.matchedCount) throw new NotFoundException('User not found or not deleted');
+    if (!result.matchedCount)
+      throw new NotFoundException('User not found or not deleted');
   }
 }

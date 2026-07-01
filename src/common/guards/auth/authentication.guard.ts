@@ -40,7 +40,6 @@ export class AuthenticationGuard implements CanActivate {
             type == TOKEN_TYPE.ACCESS
               ? req.cookies.accessToken
               : req.cookies.refreshToken;
-       
         }
         break;
       default:
@@ -54,10 +53,19 @@ export class AuthenticationGuard implements CanActivate {
 
     const user: UserDocument | null = await this.userRepo.findOne({
       filter: { _id: decoded._id },
-      options: { lean: false },
+      options: { lean: false, paranoId: false },
     });
 
     if (!user) throw new NotFoundException('User not found');
+
+    if (user.deletedAt) throw new NotFoundException('User not found');
+
+    if (
+      user.credentialsChangedAt &&
+      decoded.iat < user.credentialsChangedAt.getTime() / 1000
+    ) {
+      throw new BadRequestException('Invalid session. Please login again');
+    }
 
     if (
       await this.redisService.get(

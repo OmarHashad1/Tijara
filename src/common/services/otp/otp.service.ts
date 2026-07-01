@@ -125,7 +125,6 @@ export class OtpService {
     }
 
     await this.redisService.del(otpKey);
-
     return true;
   }
 }

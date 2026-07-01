@@ -9,11 +9,7 @@ import { HydratedDocument } from 'mongoose';
 import { SecurityService } from 'src/common/services/security';
 import { PAYMENT_METHOD, ROLE, USER_STATUS } from 'src/common/enums';
 
-import type {
-  IUser,
-  IUserAddress,
-  IUseraPayment,
-} from 'src/common/types';
+import type { IUser, IUserAddress, IUseraPayment } from 'src/common/types';
 
 export type UserDocument = HydratedDocument<IUser>;
 
@@ -146,7 +142,6 @@ export const UserModel = MongooseModule.forFeatureAsync([
           this: HydratedDocument<IUser> & { newDocument: boolean },
         ) {
           this.newDocument = this.isNew;
-
           if (this.isDirectModified('password')) {
             this.password = await securityService.hash(this.password as string);
           }
@@ -164,6 +159,12 @@ export const UserModel = MongooseModule.forFeatureAsync([
           this: HydratedDocument<IUser> & { newDocument: boolean },
         ) {},
       );
+
+      schema.pre(['find', 'findOne', 'countDocuments'], function (this: any) {
+        if (!(this.getOptions() as { paranoId?: boolean }).paranoId) {
+          this.where({ deletedAt: null });
+        }
+      });
 
       schema.post(
         ['findOne', 'find'],
@@ -190,6 +191,18 @@ export const UserModel = MongooseModule.forFeatureAsync([
           }
         },
       );
+
+      schema.pre(['updateOne', 'findOneAndUpdate'], function () {
+        const query = this.getQuery();
+        const update = this.getUpdate() as HydratedDocument<IUser>;
+        if (update.deletedAt) {
+          this.setUpdate({ ...update, $unset: { restoredAt: 1 } });
+        }
+        if (update.restoredAt) {
+          this.setUpdate({ ...update, $unset: { deletedAt: 1 } });
+          this.setQuery({ deletedAt: { $exists: false }, ...this.getQuery() });
+        }
+      });
 
       return schema;
     },
