@@ -201,6 +201,13 @@ export const UserModel = MongooseModule.forFeatureAsync([
           this.setUpdate({ ...update, $unset: { deletedAt: 1 } });
           this.setQuery({ deletedAt: { $exists: false }, ...this.getQuery() });
         }
+        const query = this.getQuery();
+        const options = this.getOptions();
+        if (options.paranoId) {
+          this.setQuery({ ...query });
+        } else {
+          this.setQuery({ ...query, deletedAt: { $exists: false } });
+        }
       });
 
       return schema;
