@@ -9,6 +9,7 @@ export interface IOrderItem {
 }
 
 export interface IOrder {
+  _id?: Types.ObjectId;
   userId: Types.ObjectId;
   items: IOrderItem[];
   couponCode?: string | null;

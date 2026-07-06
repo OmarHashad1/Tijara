@@ -66,5 +66,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 uploads/*
 
 #Documents
-*document
-document/*
+documents*
+documents/*
+
+
+#MCP
+.mcp.json*

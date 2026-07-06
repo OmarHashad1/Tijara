@@ -42,7 +42,7 @@ export const uploadFile = ({
   };
 };
 
-export const uploadPhoto = uploadFile({
+export const uploadBrandLogo = uploadFile({
   opts: {
     allwedMimType: ['image/png', 'image/jpeg', 'image/webp'],
     fileSize: 2 * 1024 * 1024,

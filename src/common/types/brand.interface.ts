@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
 
 export interface IBrand {
-  categoryId: Types.ObjectId;
+  _id?: Types.ObjectId;
+  categoryIds: Types.ObjectId[];
   name: string;
   slug: string;
   logoUrl?: string | null;

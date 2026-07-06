@@ -206,6 +206,22 @@ export abstract class DatabaseRepo<RawDoc> {
     );
   }
 
+  public async updateMany({
+    filter,
+    update,
+    options,
+  }: {
+    filter: QueryFilter<RawDoc>;
+    update: UpdateQuery<RawDoc>;
+    options?: mongo.UpdateOptions & MongooseUpdateQueryOptions<RawDoc>;
+  }): Promise<UpdateWriteOpResult> {
+    return this.model.updateMany(
+      filter,
+      { ...update, $inc: { __v: 1 } },
+      options,
+    );
+  }
+
   public async deleteOne({
     filter,
   }: {

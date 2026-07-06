@@ -1,9 +1,4 @@
-import {
-  MongooseModule,
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
 import type { IBrand } from 'src/common/types';
@@ -18,13 +13,8 @@ export type BrandDocument = HydratedDocument<IBrand>;
   strictQuery: true,
 })
 export class Brand implements IBrand {
-  @Prop({
-    type: Types.ObjectId,
-    ref: 'Category',
-    required: true,
-    index: true,
-  })
-  categoryId!: Types.ObjectId;
+  @Prop({ type: [Types.ObjectId], ref: 'Category', default: [], index: true })
+  categoryIds!: Types.ObjectId[];
 
   @Prop({
     type: String,

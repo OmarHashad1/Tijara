@@ -6,6 +6,7 @@ export interface ICartItem {
 }
 
 export interface ICart {
+  _id?: Types.ObjectId;
   userId: Types.ObjectId;
   items: ICartItem[];
   createdAt?: Date;
