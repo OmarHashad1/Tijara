@@ -37,6 +37,8 @@ export const envSchema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
   AWS_EXPIRATION: z.coerce.number().int().positive(),
   AWS_BUCKET_NAME: z.string().min(1),
+
+  STRIPE_SECRET_KEY: z.string().min(1),
 });
 
 export type Env = z.infer<typeof envSchema>;

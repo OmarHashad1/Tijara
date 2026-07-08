@@ -1,12 +1,21 @@
-import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { HydratedDocument, Types } from 'mongoose';
 import { CartRepo } from 'src/common/repositories/cart.repo';
 import { OrderRepo } from 'src/common/repositories/order.repo';
 import { ProductRepo } from 'src/common/repositories/product.repo';
-import { ORDER_STATUS } from 'src/common/enums';
-import { IOrderItem } from 'src/common/types';
+import { ORDER_STATUS, PAYMENT_PROVIDER } from 'src/common/enums';
+import { IOrderItem, IProduct } from 'src/common/types';
 import { CheckoutDto } from '../dto/checkout.dto';
 import { ListOrdersQueryDto } from '../dto/list-orders-query.dto';
+import { PaymentService } from 'src/common/services/payment/payment.service';
+import { PaymentRepo } from 'src/common/repositories/payment.repo';
+import { ConfigService } from '@nestjs/config';
+import { UserDocument } from 'src/models';
 
 @Injectable()
 export class CustomerService {
@@ -14,12 +23,15 @@ export class CustomerService {
     private readonly orderRepo: OrderRepo,
     private readonly cartRepo: CartRepo,
     private readonly productRepo: ProductRepo,
+    private readonly paymentService: PaymentService,
+    private readonly paymentRepo: PaymentRepo,
+    private readonly configService: ConfigService,
   ) {}
 
-  async checkout(userId: Types.ObjectId, dto: CheckoutDto) {
+  async checkout(user: UserDocument, dto: CheckoutDto) {
     const cart = await this.cartRepo.findOne({
-      filter: { userId },
-      options: { lean: true },
+      filter: { userId: user._id },
+      options: { lean: true,populate:{path:"items.productId"} },
     });
     if (!cart || !cart.items.length)
       throw new BadRequestException('Cart is empty');
@@ -46,12 +58,15 @@ export class CustomerService {
           );
         reserved.push({ productId: item.productId, quantity: item.quantity });
 
-        const unitPrice =product.discountPercent?
-        (  Math.round(product.price * (1 - product.discountPercent / 100) * 100) /
-          100):product.price
+        const unitPrice = product.discountPercent
+          ? Math.round(
+              product.price * (1 - product.discountPercent / 100) * 100,
+            ) / 100
+          : product.price;
         orderItems.push({
           productId: item.productId,
           name: product.name,
+         // image:product.images[0],
           price: unitPrice,
           quantity: item.quantity,
         });
@@ -71,7 +86,7 @@ export class CustomerService {
 
     const order = await this.orderRepo.create({
       data: {
-        userId,
+        userId: user._id,
         items: orderItems,
         couponCode: dto.couponCode ?? null,
         total: Math.round(total * 100) / 100,
@@ -80,12 +95,60 @@ export class CustomerService {
     });
 
     await this.cartRepo.updateOne({
-      filter: { userId },
+      filter: { userId: user._id },
       update: { $set: { items: [] } },
     });
 
-    return order;
+    if (dto.provider === PAYMENT_PROVIDER.CASH_ON_DELIVERY) {
+      const payment = await this.paymentRepo.create({
+        data: {
+          orderId: order._id,
+          amount: total,
+          provider: dto.provider,
+          transactionRef: `COD-${order._id}-${Date.now()}`,
+        },
+      });
+      order.status = ORDER_STATUS.CONFIRMED;
+      await order.save();
+      return {
+        order,
+        payment: {
+          transactionRef: payment.transactionRef,
+          amount: payment.amount,
+        },
+      };
+    }
+    // const session = this.paymentService.createCheckoutSession({
+    //   mode: 'payment',
+    //   metadata: { orderId: order._id.toString() },
+    //   success_url: `${this.configService.get('CLIENT_URL') as string}/order/success`,
+    //   cancel_url: `${this.configService.get('CLIENT_URL') as string}/order/fail`,
+    //   customer_email: user.email,
+    //   discounts: [],
+    //   line_items: (cart.items as unknown as HydratedDocument<IProduct>[]).map((item) => {
+    //     return {
+    //       quantity: item.n,
+    //       price_data: {
+    //         currency: 'EGP',
+    //         product_data:{
+    //           name:item.,
+    //           images:item.
+    //         }
+    //       },
+    //     };
+    //   }),
+    // });
   }
+
+  /*
+cancel_url
+success_url
+line_items
+customer_email
+discount
+mode
+metadata
+*/
 
   async listOrders(userId: Types.ObjectId, query: ListOrdersQueryDto) {
     const { status, page = 1, size = 20 } = query;
@@ -117,7 +180,6 @@ export class CustomerService {
       filter: { _id: id, userId, status: ORDER_STATUS.PENDING },
       update: { $set: { status: ORDER_STATUS.CANCELLED } },
     });
-   
 
     await Promise.all(
       order.items.map((item) =>

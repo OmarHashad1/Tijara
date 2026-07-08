@@ -7,6 +7,5 @@ export enum PAYMENT_STATUS {
 
 export enum PAYMENT_PROVIDER {
   STRIPE = 'stripe',
-  PAYPAL = 'paypal',
   CASH_ON_DELIVERY = 'cash_on_delivery',
 }

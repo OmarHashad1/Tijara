@@ -25,7 +25,7 @@ export class CustomerController {
 
   @Post()
   async checkout(@User() user: UserDocument, @Body() dto: CheckoutDto) {
-    const payload = await this.customerService.checkout(user._id, dto);
+    const payload = await this.customerService.checkout(user, dto);
     return { message: 'Order placed successfully', payload };
   }
 
