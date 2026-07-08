@@ -130,6 +130,7 @@ export class S3Service {
     return filesLinks;
   }
 
+
   async getAsset({
     Bucket = this.AWS_BUCKET_NAME,
     Key,

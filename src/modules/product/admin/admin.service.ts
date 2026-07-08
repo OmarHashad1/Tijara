@@ -9,6 +9,8 @@ import { BrandRepo } from 'src/common/repositories/brand.repo';
 import { CategoryRepo } from 'src/common/repositories/category.repo';
 import { ProductRepo } from 'src/common/repositories/product.repo';
 import { createSlug } from 'src/common/utils/slugify.util';
+import { S3Service } from 'src/common/services/aws';
+import { STORAGE_TYPE } from 'src/common/enums/multer.enum';
 import { CreateProductDto } from '../dto/createProduct.dto';
 import { UpdateProductDto } from '../dto/updateProduct.dto';
 import { AdjustStockDto } from '../dto/adjustStock.dto';
@@ -19,6 +21,7 @@ export class AdminService {
     private readonly productRepo: ProductRepo,
     private readonly categoryRepo: CategoryRepo,
     private readonly brandRepo: BrandRepo,
+    private readonly s3Service: S3Service,
   ) {}
 
   private async assertCategoryAndBrand(categoryId: string, brandId: string) {
@@ -40,7 +43,30 @@ export class AdminService {
       );
   }
 
-  async createProduct(dto: CreateProductDto) {
+  private async uploadProductImages(files: Express.Multer.File[]) {
+    const Keys = await Promise.all(
+      files.map((file) =>
+        this.s3Service.uploadAsset({
+          storageStrategy: STORAGE_TYPE.MEMORY,
+          file,
+          path: 'products',
+          ACL: 'public-read',
+        }),
+      ),
+    );
+    return Keys;
+  }
+
+  private async deleteProductImages(Keys: string[]) {
+    const keys = Keys
+      .filter((key): key is string => key !== null);
+    if (keys.length) await this.s3Service.deleteAssets(keys);
+  }
+
+  async createProduct(
+    dto: CreateProductDto,
+    files: Express.Multer.File[] = [],
+  ) {
     const productExists = await this.productRepo.findOne({
       filter: { name: dto.name },
     });
@@ -48,6 +74,8 @@ export class AdminService {
       throw new ConflictException('A product with this name already exists');
 
     await this.assertCategoryAndBrand(dto.categoryId, dto.brandId);
+
+    const images = files.length ? await this.uploadProductImages(files) : [];
 
     const slug = createSlug(dto.name);
     const payload = await this.productRepo.create({
@@ -60,13 +88,17 @@ export class AdminService {
         stock: dto.stock ?? 0,
         categoryId: new Types.ObjectId(dto.categoryId),
         brandId: new Types.ObjectId(dto.brandId),
-        images: dto.images ?? [],
+        images,
       },
     });
     return payload;
   }
 
-  async updateProduct(id: Types.ObjectId, dto: UpdateProductDto) {
+  async updateProduct(
+    id: Types.ObjectId,
+    dto: UpdateProductDto,
+    files: Express.Multer.File[] = [],
+  ) {
     const product = await this.productRepo.findOne({
       filter: { _id: id },
       options: { lean: true },
@@ -108,7 +140,11 @@ export class AdminService {
     if (dto.price !== undefined) update.price = dto.price;
     if (dto.discountPercent !== undefined)
       update.discountPercent = dto.discountPercent;
-    if (dto.images !== undefined) update.images = dto.images;
+
+    if (files.length) {
+      update.images = await this.uploadProductImages(files);
+      await this.deleteProductImages(product.images);
+    }
 
     const payload = await this.productRepo.findOneAndUpdate({
       filter: { _id: id },
@@ -137,7 +173,13 @@ export class AdminService {
   }
 
   async deleteProduct(id: Types.ObjectId) {
-    const result = await this.productRepo.deleteOne({ filter: { _id: id } });
-    if (!result.deletedCount) throw new NotFoundException('Product not found');
+    const product = await this.productRepo.findOne({
+      filter: { _id: id },
+      options: { lean: true },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+
+    await this.productRepo.deleteOne({ filter: { _id: id } });
+    await this.deleteProductImages(product.images);
   }
 }

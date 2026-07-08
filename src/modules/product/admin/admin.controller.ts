@@ -7,15 +7,21 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { Types } from 'mongoose';
 import { Auth } from 'src/common/decorators';
 import { ROLE } from 'src/common/enums';
 import { ParseObjectIdPipe } from 'src/common/pipes';
+import { uploadProductImages } from 'src/common/utils/multer.util';
 import { CreateProductDto } from '../dto/createProduct.dto';
 import { UpdateProductDto } from '../dto/updateProduct.dto';
 import { AdjustStockDto } from '../dto/adjustStock.dto';
 import { AdminService } from './admin.service';
+
+const MAX_PRODUCT_IMAGES = 10;
 
 @Controller('admin/products')
 @Auth([ROLE.ADMIN])
@@ -23,18 +29,28 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post()
-  async createProduct(@Body() dto: CreateProductDto) {
-    const payload = await this.adminService.createProduct(dto);
+  @UseInterceptors(
+    FilesInterceptor('images', MAX_PRODUCT_IMAGES, uploadProductImages),
+  )
+  async createProduct(
+    @Body() dto: CreateProductDto,
+    @UploadedFiles() images: Express.Multer.File[],
+  ) {
+    const payload = await this.adminService.createProduct(dto, images);
     return { message: 'Product created successfully', payload };
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FilesInterceptor('images', MAX_PRODUCT_IMAGES, uploadProductImages),
+  )
   async updateProduct(
     @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
     @Body() dto: UpdateProductDto,
+    @UploadedFiles() images: Express.Multer.File[],
   ) {
-    const payload = await this.adminService.updateProduct(id, dto);
+    const payload = await this.adminService.updateProduct(id, dto, images);
     return { message: 'Product updated successfully', payload };
   }
 

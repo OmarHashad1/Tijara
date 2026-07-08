@@ -51,3 +51,13 @@ export const uploadBrandLogo = uploadFile({
   },
   storageType: STORAGE_TYPE.DISK,
 });
+
+export const uploadProductImages = uploadFile({
+  opts: {
+    allwedMimType: ['image/png', 'image/jpeg', 'image/webp'],
+    fileSize: 5 * 1024 * 1024,
+    buildFileName: (_req: Request, _file: Express.Multer.File) =>
+      `product_${crypto.randomUUID()}`,
+  },
+  storageType: STORAGE_TYPE.MEMORY,
+});

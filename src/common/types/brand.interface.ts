@@ -5,7 +5,7 @@ export interface IBrand {
   categoryIds: Types.ObjectId[];
   name: string;
   slug: string;
-  logoUrl?: string | null;
+  logo?: string | null;
   description?: string | null;
   createdAt?: Date;
   updatedAt?: Date;

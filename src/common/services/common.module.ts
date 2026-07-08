@@ -10,7 +10,7 @@ import { OtpService } from './otp';
 @Global()
 @Module({
   imports: [JwtModule],
-  exports: [SecurityService, RedisService, EmailService, TokenService, OtpService],
+  exports: [SecurityService, RedisService, EmailService, TokenService, S3Service, OtpService],
   providers: [
     SecurityService,
     RedisService,

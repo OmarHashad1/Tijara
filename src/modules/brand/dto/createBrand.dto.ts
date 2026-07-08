@@ -5,7 +5,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -21,10 +20,6 @@ export class CreateBrandDto {
   @ArrayNotEmpty()
   @IsMongoId({ each: true })
   categoryIds!: string[];
-
-  @IsOptional()
-  @IsUrl()
-  logoUrl?: string;
 
   @IsOptional()
   @IsString()

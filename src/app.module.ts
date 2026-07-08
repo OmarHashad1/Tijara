@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { RequestPublicFile } from './common/middlewares/requestPublicFile.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseModule } from './core/database';
 import { CommonModule } from './common/services';
@@ -20,6 +21,11 @@ import { CustomerModule as CartCustomerModule } from './modules/cart/customer/cu
 import { CustomerModule as WishlistCustomerModule } from './modules/wishlist/customer/customer.module';
 import { CustomerModule as OrderCustomerModule } from './modules/order/customer/customer.module';
 import { AdminModule as OrderAdminModule } from './modules/order/admin/admin.module';
+import { CustomerModule as CouponCustomerModule } from './modules/coupon/customer/customer.module';
+import { AdminModule as CouponAdminModule } from './modules/coupon/admin/admin.module';
+import { GuestModule as ReviewGuestModule } from './modules/review/guest/guest.module';
+import { CustomerModule as ReviewCustomerModule } from './modules/review/customer/customer.module';
+import { AdminModule as ReviewAdminModule } from './modules/review/admin/admin.module';
 
 @Module({
   imports: [
@@ -44,9 +50,18 @@ import { AdminModule as OrderAdminModule } from './modules/order/admin/admin.mod
     WishlistCustomerModule,
     OrderCustomerModule,
     OrderAdminModule,
+    CouponCustomerModule,
+    CouponAdminModule,
+    ReviewGuestModule,
+    ReviewCustomerModule,
+    ReviewAdminModule,
   ],
 
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestPublicFile).forRoutes('public/*path');
+  }
+}

@@ -36,7 +36,7 @@ export class Brand implements IBrand {
   slug!: string;
 
   @Prop({ type: String, default: null, trim: true })
-  logoUrl!: string | null;
+  logo!: string | null;
 
   @Prop({ type: String, default: null, trim: true, maxLength: 1024 })
   description!: string | null;

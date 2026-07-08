@@ -1,16 +1,15 @@
 import {
-  IsArray,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   Max,
   MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
   @IsString()
@@ -24,17 +23,20 @@ export class CreateProductDto {
   @MaxLength(2048)
   description?: string;
 
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   price!: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   @Max(100)
   discountPercent?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   stock?: number;
@@ -44,9 +46,4 @@ export class CreateProductDto {
 
   @IsMongoId()
   brandId!: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsUrl({}, { each: true })
-  images?: string[];
 }
