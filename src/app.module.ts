@@ -18,6 +18,8 @@ import { AdminModule as ProductAdminModule } from './modules/product/admin/admin
 import { GuestModule as ProductGuestModule } from './modules/product/guest/guest.module';
 import { CustomerModule as CartCustomerModule } from './modules/cart/customer/customer.module';
 import { CustomerModule as WishlistCustomerModule } from './modules/wishlist/customer/customer.module';
+import { CustomerModule as OrderCustomerModule } from './modules/order/customer/customer.module';
+import { AdminModule as OrderAdminModule } from './modules/order/admin/admin.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { CustomerModule as WishlistCustomerModule } from './modules/wishlist/cus
     ProductGuestModule,
     CartCustomerModule,
     WishlistCustomerModule,
+    OrderCustomerModule,
+    OrderAdminModule,
   ],
 
   controllers: [AppController],

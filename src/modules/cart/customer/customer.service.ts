@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CartRepo } from 'src/common/repositories/cart.repo';
 import { ProductRepo } from 'src/common/repositories/product.repo';
@@ -50,7 +50,10 @@ export class CustomerService {
       });
     }
 
-    return this.cartRepo.findOne({ filter: { userId }, options: { lean: true } });
+    return this.cartRepo.findOne({
+      filter: { userId },
+      options: { lean: true },
+    });
   }
 
   async updateItemQuantity(
@@ -58,6 +61,16 @@ export class CustomerService {
     productId: Types.ObjectId,
     dto: UpdateCartItemDto,
   ) {
+    const product = await this.productRepo.findOne({ filter: { _id: productId  } });
+    
+    if(!product){
+            throw new NotFoundException("Product not found");
+
+    }
+    if(product?.stock < dto.quantity){
+      throw new UnprocessableEntityException(`Insufficient stock for product "${product.name}"`,
+)
+    }
     const result = await this.cartRepo.updateOne({
       filter: { userId, 'items.productId': productId },
       update: { $set: { 'items.$.quantity': dto.quantity } },
@@ -65,7 +78,10 @@ export class CustomerService {
     if (!result.matchedCount)
       throw new NotFoundException('Cart item not found');
 
-    return this.cartRepo.findOne({ filter: { userId }, options: { lean: true } });
+    return this.cartRepo.findOne({
+      filter: { userId },
+      options: { lean: true },
+    });
   }
 
   async removeItem(userId: Types.ObjectId, productId: Types.ObjectId) {
@@ -75,7 +91,10 @@ export class CustomerService {
     });
     if (!result.matchedCount) throw new NotFoundException('Cart not found');
 
-    return this.cartRepo.findOne({ filter: { userId }, options: { lean: true } });
+    return this.cartRepo.findOne({
+      filter: { userId },
+      options: { lean: true },
+    });
   }
 
   async clearCart(userId: Types.ObjectId) {
