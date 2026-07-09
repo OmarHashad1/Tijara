@@ -145,7 +145,7 @@ export const UserModel = MongooseModule.forFeatureAsync([
           if (this.isDirectModified('password')) {
             this.password = await securityService.hash(this.password as string);
           }
-          if (this.isDirectModified('phoneNumber')) {
+          if (this.isDirectModified('phoneNumber') && this.phoneNumber) {
             this.phoneNumber = securityService.encrypt(
               this.phoneNumber as string,
             );

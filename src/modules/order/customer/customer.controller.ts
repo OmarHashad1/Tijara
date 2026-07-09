@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { Auth, User } from 'src/common/decorators';
@@ -17,18 +18,20 @@ import { type UserDocument } from 'src/models';
 import { CheckoutDto } from '../dto/checkout.dto';
 import { ListOrdersQueryDto } from '../dto/list-orders-query.dto';
 import { CustomerService } from './customer.service';
+import { type Request } from 'express';
 
 @Controller('orders')
-@Auth([ROLE.USER])
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
+@Auth([ROLE.USER])
   @Post()
   async checkout(@User() user: UserDocument, @Body() dto: CheckoutDto) {
     const payload = await this.customerService.checkout(user, dto);
     return { message: 'Order placed successfully', payload };
   }
 
+@Auth([ROLE.USER])
   @Get()
   async listOrders(
     @User() user: UserDocument,
@@ -38,6 +41,7 @@ export class CustomerController {
     return { message: 'Orders fetched successfully', payload };
   }
 
+  @Auth([ROLE.USER])
   @Get('/:id')
   async getOrder(
     @User() user: UserDocument,
@@ -47,6 +51,7 @@ export class CustomerController {
     return { message: 'Order fetched successfully', payload };
   }
 
+  @Auth([ROLE.USER])
   @Patch('/:id/cancel')
   @HttpCode(HttpStatus.OK)
   async cancelOrder(
@@ -55,5 +60,10 @@ export class CustomerController {
   ) {
     const payload = await this.customerService.cancelOrder(user._id, id);
     return { message: 'Order cancelled successfully', payload };
+  }
+
+  @Post('/webhook')
+  async orderWebhook(@Req() req: Request) {
+    return await this.customerService.webhook(req);
   }
 }

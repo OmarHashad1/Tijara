@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CartRepo } from 'src/common/repositories/cart.repo';
 import { ProductRepo } from 'src/common/repositories/product.repo';
@@ -38,6 +43,13 @@ export class CustomerService {
       (item) => item.productId.toString() === dto.productId,
     );
 
+    if (product?.stock < dto.quantity) {
+      console.log('if block');
+      throw new UnprocessableEntityException(
+        `Insufficient stock for product ${product.name}`,
+      );
+    }
+
     if (hasItem) {
       await this.cartRepo.updateOne({
         filter: { userId, 'items.productId': productId },
@@ -61,15 +73,18 @@ export class CustomerService {
     productId: Types.ObjectId,
     dto: UpdateCartItemDto,
   ) {
-    const product = await this.productRepo.findOne({ filter: { _id: productId  } });
-    
-    if(!product){
-            throw new NotFoundException("Product not found");
+    const product = await this.productRepo.findOne({
+      filter: { _id: productId },
+    });
 
+    if (!product) {
+      throw new NotFoundException('Product not found');
     }
-    if(product?.stock < dto.quantity){
-      throw new UnprocessableEntityException(`Insufficient stock for product "${product.name}"`,
-)
+    if (product?.stock < dto.quantity) {
+      console.log('if block');
+      throw new UnprocessableEntityException(
+        `Insufficient stock for product "${product.name}"`,
+      );
     }
     const result = await this.cartRepo.updateOne({
       filter: { userId, 'items.productId': productId },

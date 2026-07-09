@@ -8,5 +8,6 @@ export class CheckoutDto {
 
   @IsOptional()
   @IsEnum(PAYMENT_PROVIDER)
-  provider?:PAYMENT_PROVIDER.CASH_ON_DELIVERY
+  provider?: PAYMENT_PROVIDER;
 }
+

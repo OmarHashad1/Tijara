@@ -122,9 +122,10 @@ export abstract class DatabaseRepo<RawDoc> {
     update: UpdateQuery<RawDoc>;
     options?: QueryOptions<RawDoc>;
   }) {
+    const existingInc = (update as { $inc?: Record<string, number> }).$inc;
     return this.model.findOneAndUpdate(
       filter,
-      { ...update, $inc: { __v: 1 } },
+      { ...update, $inc: { ...existingInc, __v: 1 } },
       options,
     );
   }
@@ -199,9 +200,10 @@ export abstract class DatabaseRepo<RawDoc> {
     update: UpdateQuery<RawDoc>;
     options?: mongo.UpdateOptions & MongooseUpdateQueryOptions<RawDoc>;
   }): Promise<UpdateWriteOpResult> {
+    const existingInc = (update as { $inc?: Record<string, number> }).$inc;
     return this.model.updateOne(
       filter,
-      { ...update, $inc: { __v: 1 } },
+      { ...update, $inc: { ...existingInc, __v: 1 } },
       options,
     );
   }
@@ -215,9 +217,10 @@ export abstract class DatabaseRepo<RawDoc> {
     update: UpdateQuery<RawDoc>;
     options?: mongo.UpdateOptions & MongooseUpdateQueryOptions<RawDoc>;
   }): Promise<UpdateWriteOpResult> {
+    const existingInc = (update as { $inc?: Record<string, number> }).$inc;
     return this.model.updateMany(
       filter,
-      { ...update, $inc: { __v: 1 } },
+      { ...update, $inc: { ...existingInc, __v: 1 } },
       options,
     );
   }

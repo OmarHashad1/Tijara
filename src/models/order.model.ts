@@ -1,11 +1,6 @@
-import {
-  MongooseModule,
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { ORDER_STATUS } from 'src/common/enums';
+import { ORDER_STATUS, PAYMENT_PROVIDER } from 'src/common/enums';
 
 import type { IOrder, IOrderItem } from 'src/common/types';
 
@@ -18,6 +13,9 @@ export class OrderItem implements IOrderItem {
 
   @Prop({ type: String, required: true, trim: true })
   name!: string;
+
+  @Prop({ type: String, required: true })
+  image!: string;
 
   @Prop({ type: Number, required: true, min: 0 })
   price!: number;
@@ -47,6 +45,22 @@ export class Order implements IOrder {
 
   @Prop({ type: Number, required: true, min: 0 })
   total!: number;
+
+  @Prop({ type: String })
+  intentId?: string;
+
+  @Prop({
+    type: String,
+    enum: [...Object.values(PAYMENT_PROVIDER)],
+    required: true,
+  })
+  paymentMethod!: PAYMENT_PROVIDER;
+
+  @Prop({ type: Date, default: null })
+  paidAt!: Date | null;
+
+  @Prop({ type: Date, default: null })
+  refundedAt!: Date | null;
 
   @Prop({
     type: String,

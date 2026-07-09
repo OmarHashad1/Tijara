@@ -5,12 +5,18 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { ResponseInterceptor, TimeoutInterceptor } from './common/interceptors';
+import { raw, Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     credential: true,
     origin: CLIENT_URL,
+  });
+
+  app.use('/orders/webhook', raw({ type: 'application/json' }));
+  app.getHttpAdapter().get('/health', (_req: Request, res: Response) => {
+    res.status(200).json({ message: 'ok' });
   });
 
   app.useGlobalInterceptors(

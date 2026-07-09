@@ -3,6 +3,7 @@ export enum PAYMENT_STATUS {
   COMPLETED = 'completed',
   FAILED = 'failed',
   REFUNDED = 'refunded',
+  CANCELLED = 'cancelled',
 }
 
 export enum PAYMENT_PROVIDER {
