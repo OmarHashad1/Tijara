@@ -59,11 +59,8 @@ export class RedisCacheInterceptor implements NestInterceptor {
     );
     const data = await this.redisService.get(cachedKey);
     if (data) {
-      console.log('Cache hit');
       return of(data);
     }
-    console.log('Cache miss');
-
     return next.handle().pipe(
       tap(async (value: string) => {
         await this.redisService.set({ key: cachedKey, value, ttl });
