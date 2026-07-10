@@ -23,7 +23,12 @@ async function bootstrap() {
     new TimeoutInterceptor(),
     new ResponseInterceptor(),
   );
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production' ? undefined : false,
+    }),
+  );
   app.use(cookieParser());
 
   app.useGlobalPipes(

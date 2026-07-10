@@ -27,6 +27,10 @@ import { GuestModule as ReviewGuestModule } from './modules/review/guest/guest.m
 import { CustomerModule as ReviewCustomerModule } from './modules/review/customer/customer.module';
 import { AdminModule as ReviewAdminModule } from './modules/review/admin/admin.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 @Module({
   imports: [
@@ -36,7 +40,14 @@ import { CacheModule } from '@nestjs/cache-manager';
       validate: validateEnv,
       load: [tokenConfig],
     }),
-    CacheModule.register({ isGlobal: true ,ttl:10000}),
+    CacheModule.register({ isGlobal: true, ttl: 10000 }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      graphiql: true,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      playground: false,
+     // plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true  })],
+    }),
     CommonModule,
     AuthModule,
     DatabaseModule,
