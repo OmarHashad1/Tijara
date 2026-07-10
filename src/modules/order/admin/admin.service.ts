@@ -2,7 +2,10 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Types } from 'mongoose';
 import { OrderRepo } from 'src/common/repositories/order.repo';
 import { ProductRepo } from 'src/common/repositories/product.repo';
+import { UserRepo } from 'src/common/repositories';
 import { ORDER_STATUS, ORDER_STATUS_TRANSITIONS } from 'src/common/enums';
+import { EMAIL_EVENTS } from 'src/common/enums/email.enums';
+import { emailEmitter } from 'src/common/events/email.event';
 import { ListAdminOrdersQueryDto } from '../dto/list-admin-orders-query.dto';
 import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
 
@@ -11,6 +14,7 @@ export class AdminService {
   constructor(
     private readonly orderRepo: OrderRepo,
     private readonly productRepo: ProductRepo,
+    private readonly userRepo: UserRepo,
   ) {}
 
   async listOrders(query: ListAdminOrdersQueryDto) {
@@ -62,6 +66,19 @@ export class AdminService {
           }),
         ),
       );
+    }
+
+    const user = await this.userRepo.findOne({
+      filter: { _id: order.userId },
+      options: { lean: true },
+    });
+    if (user) {
+      emailEmitter.emit(EMAIL_EVENTS.ORDER_STATUS_UPDATED, {
+        to: user.email,
+        firstName: user.firstName,
+        orderId: id.toString(),
+        status: dto.status,
+      });
     }
 
     return this.orderRepo.findOne({

@@ -58,7 +58,7 @@ export class CustomerController {
     @User() user: UserDocument,
     @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
   ) {
-    const payload = await this.customerService.cancelOrder(user._id, id);
+    const payload = await this.customerService.cancelOrder(user, id);
     return { message: 'Order cancelled successfully', payload };
   }
 

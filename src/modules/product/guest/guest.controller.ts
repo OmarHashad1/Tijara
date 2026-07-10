@@ -9,7 +9,7 @@ import { TTL } from 'src/common/decorators';
 export class GuestController {
   constructor(private readonly guestService: GuestService) {}
 
-  @TTL(10)
+  @TTL(20)
   @UseInterceptors(RedisCacheInterceptor)
   @Get()
   async listProducts(@Query() query: ListProductsQueryDto) {

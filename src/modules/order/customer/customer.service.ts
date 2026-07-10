@@ -17,6 +17,8 @@ import {
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
 } from 'src/common/enums';
+import { EMAIL_EVENTS } from 'src/common/enums/email.enums';
+import { emailEmitter } from 'src/common/events/email.event';
 import { ICoupon, IOrder, IOrderItem, IProduct } from 'src/common/types';
 import { CheckoutDto } from '../dto/checkout.dto';
 import { ListOrdersQueryDto } from '../dto/list-orders-query.dto';
@@ -24,6 +26,7 @@ import { PaymentService } from 'src/common/services/payment/payment.service';
 import { PaymentRepo } from 'src/common/repositories/payment.repo';
 import { ConfigService } from '@nestjs/config';
 import { UserDocument } from 'src/models';
+import { UserRepo } from 'src/common/repositories';
 import { CouponRepo } from 'src/common/repositories/coupon.repo';
 import { Checkout, Coupon, PaymentIntent, Response } from 'stripe';
 import { Request } from 'express';
@@ -39,6 +42,7 @@ export class CustomerService {
     private readonly configService: ConfigService,
     private readonly s3Service: S3Service,
     private readonly couponRepo: CouponRepo,
+    private readonly userRepo: UserRepo,
   ) {}
 
   async checkout(user: UserDocument, dto: CheckoutDto) {
@@ -170,6 +174,14 @@ export class CustomerService {
       await this.cartRepo.deleteOne({
         filter: { userId: user._id },
       });
+
+      emailEmitter.emit(EMAIL_EVENTS.ORDER_CONFIRMED, {
+        to: user.email,
+        firstName: user.firstName,
+        orderId: order._id.toString(),
+        total: order.total,
+      });
+
       return {
         order,
         payment: {
@@ -236,9 +248,9 @@ export class CustomerService {
     return order;
   }
 
-  async cancelOrder(userId: Types.ObjectId, id: Types.ObjectId) {
+  async cancelOrder(user: UserDocument, id: Types.ObjectId) {
     const order = await this.orderRepo.findOne({
-      filter: { _id: id, userId },
+      filter: { _id: id, userId: user._id },
       options: { lean: true },
     });
     if (!order) throw new NotFoundException('Order not found');
@@ -251,7 +263,7 @@ export class CustomerService {
       );
 
     const claim = await this.orderRepo.updateOne({
-      filter: { _id: id, userId, status: order.status },
+      filter: { _id: id, userId: user._id, status: order.status },
       update: { $set: { status: ORDER_STATUS.CANCELLED } },
     });
     if (!claim.matchedCount)
@@ -263,6 +275,11 @@ export class CustomerService {
       await this.paymentRepo.findOneAndUpdate({
         filter: { orderId: order._id },
         update: { $set: { status: PAYMENT_STATUS.CANCELLED } },
+      });
+      emailEmitter.emit(EMAIL_EVENTS.ORDER_CANCELLED, {
+        to: user.email,
+        firstName: user.firstName,
+        orderId: id.toString(),
       });
     } else if (
       order.paymentMethod === PAYMENT_PROVIDER.STRIPE &&
@@ -278,10 +295,21 @@ export class CustomerService {
         filter: { orderId: order._id },
         update: { $set: { status: PAYMENT_STATUS.REFUNDED } },
       });
+      emailEmitter.emit(EMAIL_EVENTS.ORDER_REFUNDED, {
+        to: user.email,
+        firstName: user.firstName,
+        orderId: id.toString(),
+        amount: order.total,
+      });
     } else {
       await this.paymentRepo.findOneAndUpdate({
         filter: { orderId: order._id },
         update: { $set: { status: PAYMENT_STATUS.CANCELLED } },
+      });
+      emailEmitter.emit(EMAIL_EVENTS.ORDER_CANCELLED, {
+        to: user.email,
+        firstName: user.firstName,
+        orderId: id.toString(),
       });
     }
 
@@ -296,6 +324,13 @@ export class CustomerService {
 
     return this.orderRepo.findOne({
       filter: { _id: id },
+      options: { lean: true },
+    });
+  }
+
+  private async findOrderOwner(userId: Types.ObjectId) {
+    return this.userRepo.findOne({
+      filter: { _id: userId },
       options: { lean: true },
     });
   }
@@ -348,6 +383,16 @@ export class CustomerService {
           filter: { userId: order.userId },
         });
 
+        const owner = await this.findOrderOwner(order.userId);
+        if (owner) {
+          emailEmitter.emit(EMAIL_EVENTS.ORDER_CONFIRMED, {
+            to: owner.email,
+            firstName: owner.firstName,
+            orderId,
+            total: order.total,
+          });
+        }
+
         return;
       }
       case 'payment_intent.payment_failed':
@@ -382,6 +427,16 @@ export class CustomerService {
             }),
           ),
         );
+
+        const owner = await this.findOrderOwner(order.userId);
+        if (owner) {
+          emailEmitter.emit(EMAIL_EVENTS.ORDER_CANCELLED, {
+            to: owner.email,
+            firstName: owner.firstName,
+            orderId,
+          });
+        }
+
         return;
       }
       case 'checkout.session.expired': {
@@ -413,6 +468,16 @@ export class CustomerService {
             }),
           ),
         );
+
+        const owner = await this.findOrderOwner(order.userId);
+        if (owner) {
+          emailEmitter.emit(EMAIL_EVENTS.ORDER_CANCELLED, {
+            to: owner.email,
+            firstName: owner.firstName,
+            orderId,
+          });
+        }
+
         return;
       }
       default:

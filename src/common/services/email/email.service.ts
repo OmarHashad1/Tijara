@@ -37,6 +37,60 @@ export class EmailService implements OnModuleInit {
         });
       },
     );
+
+    emailEmitter.on(
+      EMAIL_EVENTS.ORDER_CONFIRMED,
+      async ({ to, firstName, orderId, total }) => {
+        await this.sendMail(to, 'Your order has been confirmed', {
+          html: `<p>Hi ${firstName}, your order <b>#${orderId}</b> has been confirmed. Total: <b>${total}</b>.</p>`,
+        });
+      },
+    );
+
+    emailEmitter.on(
+      EMAIL_EVENTS.ORDER_CANCELLED,
+      async ({ to, firstName, orderId }) => {
+        await this.sendMail(to, 'Your order has been cancelled', {
+          html: `<p>Hi ${firstName}, your order <b>#${orderId}</b> has been cancelled.</p>`,
+        });
+      },
+    );
+
+    emailEmitter.on(
+      EMAIL_EVENTS.ORDER_REFUNDED,
+      async ({ to, firstName, orderId, amount }) => {
+        await this.sendMail(to, 'Your order has been refunded', {
+          html: `<p>Hi ${firstName}, your order <b>#${orderId}</b> was cancelled and <b>${amount}</b> has been refunded to your original payment method.</p>`,
+        });
+      },
+    );
+
+    emailEmitter.on(
+      EMAIL_EVENTS.ORDER_STATUS_UPDATED,
+      async ({ to, firstName, orderId, status }) => {
+        await this.sendMail(to, 'Your order status has been updated', {
+          html: `<p>Hi ${firstName}, your order <b>#${orderId}</b> is now <b>${status}</b>.</p>`,
+        });
+      },
+    );
+
+    emailEmitter.on(
+      EMAIL_EVENTS.USER_BANNED,
+      async ({ to, firstName, reason }) => {
+        await this.sendMail(to, 'Your account has been suspended', {
+          html: `<p>Hi ${firstName}, your account has been suspended. Reason: <b>${reason}</b>.</p>`,
+        });
+      },
+    );
+
+    emailEmitter.on(
+      EMAIL_EVENTS.USER_UNBANNED,
+      async ({ to, firstName }) => {
+        await this.sendMail(to, 'Your account has been reinstated', {
+          html: `<p>Hi ${firstName}, your account has been reinstated and is now active again.</p>`,
+        });
+      },
+    );
   }
 
   async verifyConnection() {

@@ -6,6 +6,8 @@ import {
 import { Types } from 'mongoose';
 import { UserRepo } from 'src/common/repositories';
 import { USER_STATUS, USER_STATUS_TRANSITIONS } from 'src/common/enums';
+import { EMAIL_EVENTS } from 'src/common/enums/email.enums';
+import { emailEmitter } from 'src/common/events/email.event';
 import { BanUserDto } from '../dto/ban-user.dto';
 import { ListUsersQueryDto } from '../dto/list-users-query.dto';
 
@@ -56,6 +58,12 @@ export class AdminService {
         $set: { status: USER_STATUS.BANNED, banReason: dto.banReason },
       },
     });
+
+    emailEmitter.emit(EMAIL_EVENTS.USER_BANNED, {
+      to: user.email,
+      firstName: user.firstName,
+      reason: dto.banReason,
+    });
   }
 
   async unbanUser(id: Types.ObjectId) {
@@ -74,6 +82,11 @@ export class AdminService {
     await this.userRepo.updateOne({
       filter: { _id: id },
       update: { $set: { status: USER_STATUS.ACTIVE, banReason: null } },
+    });
+
+    emailEmitter.emit(EMAIL_EVENTS.USER_UNBANNED, {
+      to: user.email,
+      firstName: user.firstName,
     });
   }
 

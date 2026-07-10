@@ -14,6 +14,38 @@ export interface EMAIL_EVENTS_PAYLOAD {
     firstName: string;
     otp: string;
   };
+  [EMAIL_EVENTS.ORDER_CONFIRMED]: {
+    to: string;
+    firstName: string;
+    orderId: string;
+    total: number;
+  };
+  [EMAIL_EVENTS.ORDER_CANCELLED]: {
+    to: string;
+    firstName: string;
+    orderId: string;
+  };
+  [EMAIL_EVENTS.ORDER_REFUNDED]: {
+    to: string;
+    firstName: string;
+    orderId: string;
+    amount: number;
+  };
+  [EMAIL_EVENTS.ORDER_STATUS_UPDATED]: {
+    to: string;
+    firstName: string;
+    orderId: string;
+    status: string;
+  };
+  [EMAIL_EVENTS.USER_BANNED]: {
+    to: string;
+    firstName: string;
+    reason: string;
+  };
+  [EMAIL_EVENTS.USER_UNBANNED]: {
+    to: string;
+    firstName: string;
+  };
 }
 
 class EmailEmitter extends EventEmitter {
