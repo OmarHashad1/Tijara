@@ -26,6 +26,7 @@ import { AdminModule as CouponAdminModule } from './modules/coupon/admin/admin.m
 import { GuestModule as ReviewGuestModule } from './modules/review/guest/guest.module';
 import { CustomerModule as ReviewCustomerModule } from './modules/review/customer/customer.module';
 import { AdminModule as ReviewAdminModule } from './modules/review/admin/admin.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AdminModule as ReviewAdminModule } from './modules/review/admin/admin.m
       validate: validateEnv,
       load: [tokenConfig],
     }),
+    CacheModule.register({ isGlobal: true ,ttl:10000}),
     CommonModule,
     AuthModule,
     DatabaseModule,

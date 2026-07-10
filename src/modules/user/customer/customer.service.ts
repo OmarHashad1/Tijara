@@ -43,7 +43,6 @@ export class CustomerService {
           filter: { _id: user._id },
           update: { credentialsChangedAt: new Date() },
         });
-        await this.redisService.removeFCMUser(user._id);
         break;
       }
       default:
@@ -128,8 +127,12 @@ export class CustomerService {
       update: {
         $set: {
           ...(dto.city !== undefined && { 'addresses.$.city': dto.city }),
-          ...(dto.country !== undefined && { 'addresses.$.country': dto.country }),
-          ...(dto.isDefault !== undefined && { 'addresses.$.isDefault': dto.isDefault }),
+          ...(dto.country !== undefined && {
+            'addresses.$.country': dto.country,
+          }),
+          ...(dto.isDefault !== undefined && {
+            'addresses.$.isDefault': dto.isDefault,
+          }),
         },
       },
     });
@@ -172,10 +175,7 @@ export class CustomerService {
     });
   }
 
-  async deletePaymentMethod(
-    userId: Types.ObjectId,
-    paymentId: Types.ObjectId,
-  ) {
+  async deletePaymentMethod(userId: Types.ObjectId, paymentId: Types.ObjectId) {
     await this.userRepo.updateOne({
       filter: { _id: userId },
       update: { $pull: { paymentsMethod: { _id: paymentId } } },
