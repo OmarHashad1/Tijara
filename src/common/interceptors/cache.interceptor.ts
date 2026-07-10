@@ -40,7 +40,7 @@ export class RedisCacheInterceptor implements NestInterceptor {
     switch (context.getType()) {
       case 'http':
         url = context.switchToHttp().getRequest().url;
-        user = context.switchToHttp().getRequest().credentails.user;
+        user = context.switchToHttp().getRequest().credentails?.user;
       case 'ws':
         break;
       case 'rpc':
@@ -50,17 +50,20 @@ export class RedisCacheInterceptor implements NestInterceptor {
         throw new BadRequestException('Invalid protocol');
     }
 
-    if (!user)
+    if (isPersonalCache && !user)
       throw new UnauthorizedException('Invalid session, please login again');
 
     const cachedKey = this.redisService.CahcedKey(
       url,
-      isPersonalCache ? user._id.toString() : null,
+      isPersonalCache && user ? user._id.toString() : null,
     );
     const data = await this.redisService.get(cachedKey);
     if (data) {
+      console.log('Cache hit');
       return of(data);
     }
+    console.log('Cache miss');
+
     return next.handle().pipe(
       tap(async (value: string) => {
         await this.redisService.set({ key: cachedKey, value, ttl });
