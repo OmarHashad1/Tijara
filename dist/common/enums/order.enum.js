@@ -1,0 +1,19 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ORDER_STATUS_TRANSITIONS = exports.ORDER_STATUS = void 0;
+var ORDER_STATUS;
+(function (ORDER_STATUS) {
+    ORDER_STATUS["PENDING"] = "pending";
+    ORDER_STATUS["SHIPPED"] = "shipped";
+    ORDER_STATUS["CONFIRMED"] = "confirmed";
+    ORDER_STATUS["DELIVERED"] = "delivered";
+    ORDER_STATUS["CANCELLED"] = "cancelled";
+})(ORDER_STATUS || (exports.ORDER_STATUS = ORDER_STATUS = {}));
+exports.ORDER_STATUS_TRANSITIONS = {
+    [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
+    [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.SHIPPED, ORDER_STATUS.CANCELLED],
+    [ORDER_STATUS.SHIPPED]: [ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED],
+    [ORDER_STATUS.DELIVERED]: [],
+    [ORDER_STATUS.CANCELLED]: [],
+};
+//# sourceMappingURL=order.enum.js.map

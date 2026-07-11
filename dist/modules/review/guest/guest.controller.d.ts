@@ -1,0 +1,25 @@
+import { Types } from 'mongoose';
+import { ListReviewsQueryDto } from '../dto/list-reviews-query.dto';
+import { GuestService } from './guest.service';
+export declare class GuestController {
+    private readonly guestService;
+    constructor(guestService: GuestService);
+    listReviews(productId: Types.ObjectId, query: ListReviewsQueryDto): Promise<{
+        message: string;
+        payload: {
+            docs: (import("mongoose").Document<unknown, {}, import("../../../common/types").IReview, {}, import("mongoose").DefaultSchemaOptions> & import("../../../common/types").IReview & Required<{
+                _id: Types.ObjectId;
+            }> & {
+                __v: number;
+            } & {
+                id: string;
+            })[] | null;
+            meta: {
+                count?: number | undefined;
+                page?: string | number | undefined;
+                size?: string | number | undefined;
+                pages?: number | undefined;
+            };
+        };
+    }>;
+}

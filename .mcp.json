@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "bruno-mcp": {
+      "command": "node",
+      "args": ["/Users/omarhashad/Documents/MCP/bruno-mcp/dist/index.js"],
+      "env": {}
+    }
+  }
+}

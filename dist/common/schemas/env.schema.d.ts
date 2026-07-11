@@ -1,0 +1,37 @@
+import { z } from 'zod';
+export declare const envSchema: z.ZodObject<{
+    NODE_ENV: z.ZodDefault<z.ZodEnum<{
+        test: "test";
+        development: "development";
+        production: "production";
+    }>>;
+    PORT: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
+    APPLICATION_NAME: z.ZodString;
+    MONGODB_URI: z.ZodURL;
+    SMTP_USER: z.ZodEmail;
+    SMTP_PASS: z.ZodString;
+    SMTP_PORT: z.ZodCoercedNumber<unknown>;
+    SMTP_SERVICE: z.ZodString;
+    ENCRYPTION_SECRET: z.ZodString;
+    ENCRYPTION_IV_LENGTH: z.ZodCoercedNumber<unknown>;
+    ENCRYPTION_ALGORITHM: z.ZodString;
+    REDIS_URL: z.ZodURL;
+    USER_ACCESS_SECRET: z.ZodString;
+    USER_REFRESH_SECRET: z.ZodString;
+    ADMIN_ACCESS_SECRET: z.ZodString;
+    ADMIN_REFRESH_SECRET: z.ZodString;
+    COMPANY_ACCESS_SECRET: z.ZodString;
+    COMPANY_REFRESH_SECRET: z.ZodString;
+    CLIENT_URL: z.ZodURL;
+    GOOGLE_CLIENT_ID: z.ZodString;
+    GOOGLE_CLIENT_SECRET: z.ZodString;
+    GOOGLE_CALLBACK_URL: z.ZodURL;
+    AWS_REGION: z.ZodString;
+    AWS_ACCESS_KEY_ID: z.ZodString;
+    AWS_SECRET_ACCESS_KEY: z.ZodString;
+    AWS_EXPIRATION: z.ZodCoercedNumber<unknown>;
+    AWS_BUCKET_NAME: z.ZodString;
+    STRIPE_SECRET_KEY: z.ZodString;
+    STRIPE_HOOK_SECRET: z.ZodString;
+}, z.core.$strip>;
+export type Env = z.infer<typeof envSchema>;
