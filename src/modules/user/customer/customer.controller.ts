@@ -13,6 +13,7 @@ import { CustomerService } from './customer.service';
 import { ROLE } from 'src/common/enums';
 import { Auth } from 'src/common/decorators';
 import { User } from 'src/common/decorators';
+import { SkipEmailVerification } from 'src/common/decorators';
 import { type IUser } from 'src/common/types';
 import { type Request } from 'express';
 import { type UserDocument } from 'src/models';
@@ -116,6 +117,8 @@ export class CustomerController {
     return { message: 'Account deleted successfully' };
   }
 
+  @SkipEmailVerification()
+  @Auth([ROLE.ADMIN, ROLE.USER])
   @Post('/logout')
   async logout(@Req() req: Request, @Body() dto: LogoutDto) {
     const { user, decoded } = req.credentials;

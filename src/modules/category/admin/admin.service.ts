@@ -29,7 +29,7 @@ export class AdminService {
     const payload = await this.categoryRepo.create({
       data: { name, status, slug },
     });
-    return { name, slug: payload.slug, status: payload.status };
+    return { id: payload.id, name, slug: payload.slug, status: payload.status };
   }
 
   async updateCategory(id: Types.ObjectId, dto: UpdateCategoryDto) {

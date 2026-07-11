@@ -35,7 +35,6 @@ export class GuestService {
   async getSingleProduct({ slug }: { slug: string }) {
     const product = await this.productRepo.findOne({
       filter: { slug },
-      options: { lean: true },
     });
     if (!product) throw new NotFoundException('Product not found');
     return product;

@@ -2,6 +2,88 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type BrandEntity {
+  id: String!
+  name: String!
+  slug: String!
+  logo: String
+  description: String
+}
+
+type CategoryEntity {
+  id: String!
+  name: String!
+  slug: String
+  status: CATEGORY_STATUS
+}
+
+enum CATEGORY_STATUS {
+  DRAFT
+  PUBLISHED
+  SUSPENDED
+}
+
+type CategoryWithBrands {
+  id: String!
+  name: String!
+  slug: String
+  status: CATEGORY_STATUS
+  brands: [BrandEntity!]!
+}
+
+type ProductEntity {
+  id: String!
+  name: String!
+  slug: String!
+  description: String!
+  price: Float!
+  discountPercent: Int!
+  categoryId: String!
+  brandId: String!
+  images: [String!]!
+}
+
+type ProductListMeta {
+  count: Int
+  page: Int
+  size: Int
+  pages: Int
+}
+
+type PaginatedProducts {
+  docs: [ProductEntity!]!
+  meta: ProductListMeta!
+}
+
 type Query {
-  sayHi: String!
+  categories: [CategoryEntity!]!
+  category(slug: String!): CategoryWithBrands!
+  listProducts(query: ListProductQueryInput): PaginatedProducts!
+  getProduct(slug: String!): ProductEntity!
+}
+
+input ListProductQueryInput {
+  search: String
+  categoryId: String
+  brandId: String
+  minPrice: Float
+  maxPrice: Float
+  page: Int
+  size: Int
+}
+
+type Mutation {
+  createCategory(input: CreateCategoryInput!): CategoryEntity!
+  updateCategory(id: String!, input: UpdateCategoryInput!): CategoryEntity!
+  deleteCategory(id: String!): Boolean!
+}
+
+input CreateCategoryInput {
+  name: String!
+  status: CATEGORY_STATUS = PUBLISHED
+}
+
+input UpdateCategoryInput {
+  name: String
+  status: CATEGORY_STATUS = PUBLISHED
 }

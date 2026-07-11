@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { CategoryModule } from '../category.module';
 import { GuestController } from './guest.controller';
 import { GuestService } from './guest.service';
+import { GuestResolver } from './guest.resolver';
 import { BrandModule } from 'src/modules/brand/brand.module';
 
 @Module({
   imports: [CategoryModule, BrandModule],
   controllers: [GuestController],
-  providers: [GuestService],
+  providers: [GuestService, GuestResolver],
 })
 export class GuestModule {}

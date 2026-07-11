@@ -13,6 +13,8 @@ import { RedisService } from '../services/redis';
 import { Reflector } from '@nestjs/core';
 import { UserDocument } from 'src/models';
 import { personalCacheName } from '../decorators/personalCach.decorator';
+import { ctxType } from '../types';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class RedisCacheInterceptor implements NestInterceptor {
@@ -37,17 +39,24 @@ export class RedisCacheInterceptor implements NestInterceptor {
 
     let user: UserDocument | null = null;
 
-    switch (context.getType()) {
-      case 'http':
+    switch (context.getType<ctxType>()) {
+      case 'http': {
         url = context.switchToHttp().getRequest().url;
         user = context.switchToHttp().getRequest().credentails?.user;
-      case 'ws':
         break;
-      case 'rpc':
+      }
+      case 'graphql': {
+        const ctx = GqlExecutionContext.create(context);
+        url = JSON.stringify({
+          path: ctx.getInfo().path.key,
+          typename: ctx.getInfo().path.typename,
+          args: ctx.getArgs(),
+        });
+        user = ctx.getContext().req.credentials?.user;
         break;
-
+      }
       default:
-        throw new BadRequestException('Invalid protocol');
+        throw new BadRequestException('Invalid or unsupported protocol');
     }
 
     if (isPersonalCache && !user)
@@ -61,6 +70,7 @@ export class RedisCacheInterceptor implements NestInterceptor {
     if (data) {
       return of(data);
     }
+
     return next.handle().pipe(
       tap(async (value: string) => {
         await this.redisService.set({ key: cachedKey, value, ttl });

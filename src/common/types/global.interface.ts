@@ -3,6 +3,7 @@ import { IDecodedToken } from './auth.interface';
 import { IUser } from './user.interface';
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { UserDocument } from 'src/models';
+import { ContextType } from '@nestjs/common';
 
 declare global {
   namespace Express {
@@ -34,3 +35,5 @@ export interface IS3UploadAssets {
   ACL?: ObjectCannedACL;
   contentType?: string | undefined;
 }
+
+export type ctxType = ContextType | 'graphql';

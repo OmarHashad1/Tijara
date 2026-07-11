@@ -14,15 +14,15 @@ export class GuestService {
   async listCategories() {
     return this.categoryRepo.find({
       filter: { status: CATEGORY_STATUS.PUBLISHED },
-      options: { lean: true },
-      projection: { _id: 1, name: 1 },
+      projection: { _id: 1, name: 1, slug: 1, status: 1 },
+      options: { lean: false },
     });
   }
   async getSingleCategory({ slug }: { slug: string }) {
     const category = await this.categoryRepo.findOne({
       filter: { slug, status: CATEGORY_STATUS.PUBLISHED },
-      options: { lean: true },
-      projection: { _id: 1, name: 1 },
+      projection: { _id: 1, name: 1, slug: 1, status: 1 },
+      options: { lean: false },
     });
 
     if (!category) throw new NotFoundException('Category not found');
@@ -31,7 +31,7 @@ export class GuestService {
       filter: { categoryIds: category._id },
     });
 
-    return { ...category, brands };
+    return { ...category.toObject({ virtuals: true }), brands };
   }
 
   async listCategoryBrands(id: Types.ObjectId) {

@@ -8,8 +8,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLE } from 'src/common/enums';
-import { IUser } from 'src/common/types';
+import { ctxType, IUser } from 'src/common/types';
 import { type Request } from 'express';
+import { GqlExecutionContext } from '@nestjs/graphql';
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
@@ -22,16 +23,21 @@ export class AuthorizationGuard implements CanActivate {
       throw new InternalServerErrorException('Allowed roles must be provided');
 
     let user: IUser;
-    switch (context.getType()) {
+    switch (context.getType<ctxType>()) {
       case 'http': {
         const req: Request = context.switchToHttp().getRequest();
         user = req.credentials.user;
         break;
       }
-      case 'ws':
-      case 'rpc':
+      case 'graphql': {
+        const req: Request =
+          GqlExecutionContext.create(context).getContext().req;
+
+        user = req.credentials.user;
+        break;
+      }
       default:
-        throw new BadRequestException('Invalid protocol');
+        throw new BadRequestException('Invalid or unsupported protocol');
     }
     if (!allowedRoles.includes(user.role)) {
       throw new ForbiddenException('You do not have access to this resource');

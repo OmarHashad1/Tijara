@@ -14,6 +14,8 @@ import { TOKEN_TYPE } from 'src/common/enums/auth.enum';
 import { UserRepo } from 'src/common/repositories';
 import { UserDocument } from 'src/models';
 import { RedisService } from 'src/common/services/redis';
+import { ctxType } from 'src/common/types';
+import { GqlExecutionContext } from '@nestjs/graphql';
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
   constructor(
@@ -24,7 +26,7 @@ export class AuthenticationGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     let req: Request;
-    let token: string;
+    let token: string | null = null;
 
     const type =
       this.reflector.getAllAndOverride<TOKEN_TYPE>('tokenType', [
@@ -32,19 +34,29 @@ export class AuthenticationGuard implements CanActivate {
         context.getClass(),
       ]) ?? 'access';
 
-    switch (context.getType()) {
-      case 'http':
-        {
-          req = context.switchToHttp().getRequest();
-          token =
-            type == TOKEN_TYPE.ACCESS
-              ? req.cookies.accessToken
-              : req.cookies.refreshToken;
-        }
+    switch (context.getType<ctxType>()) {
+      case 'http': {
+        req = context.switchToHttp().getRequest();
+        token =
+          type == TOKEN_TYPE.ACCESS
+            ? req.cookies.accessToken
+            : req.cookies.refreshToken;
         break;
+      }
+      case 'graphql': {
+        req = GqlExecutionContext.create(context).getContext().req;
+        token =
+          type === TOKEN_TYPE.ACCESS
+            ? req.cookies.accessToken
+            : req.cookies.refreshToken;
+        break;
+      }
       default:
-        throw new BadRequestException('Invalid protocol');
+        throw new BadRequestException('Invalid or unsupported protocol');
     }
+
+
+    if (!token) return false;
 
     const decoded = await this.tokenService.decodeToken({
       token,
@@ -59,6 +71,7 @@ export class AuthenticationGuard implements CanActivate {
     if (!user) throw new NotFoundException('User not found');
 
     if (user.deletedAt) throw new NotFoundException('User not found');
+
 
     if (
       user.credentialsChangedAt &&

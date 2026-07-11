@@ -17,7 +17,7 @@ export const User = createParamDecorator(
       case 'ws':
       case 'rpc':
       default:
-        throw new BadRequestException('Invalid protocol');
+        throw new BadRequestException('Invalid or unsupported protocol');
     }
 
     return user;
