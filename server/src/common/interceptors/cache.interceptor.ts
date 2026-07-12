@@ -16,6 +16,14 @@ import { personalCacheName } from '../decorators/personalCach.decorator';
 import { ctxType } from '../types';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
+function parseIfJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
 @Injectable()
 export class RedisCacheInterceptor implements NestInterceptor {
   constructor(
@@ -66,9 +74,10 @@ export class RedisCacheInterceptor implements NestInterceptor {
       url,
       isPersonalCache && user ? user._id.toString() : null,
     );
-    const data = await this.redisService.get(cachedKey);
-    if (data) {
-      return of(data);
+    const cached = await this.redisService.get(cachedKey);
+    if (cached) {
+    
+      return of(typeof cached === 'string' ? parseIfJson(cached) : cached);
     }
 
     return next.handle().pipe(

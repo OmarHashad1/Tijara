@@ -31,6 +31,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
   imports: [
@@ -46,7 +47,6 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       graphiql: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
-     // plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true  })],
     }),
     CommonModule,
     AuthModule,
@@ -68,6 +68,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
     ReviewGuestModule,
     ReviewCustomerModule,
     ReviewAdminModule,
+    RealtimeModule,
   ],
 
   controllers: [AppController],

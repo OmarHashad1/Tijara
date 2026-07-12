@@ -10,7 +10,7 @@ import { raw, Request, Response } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    credential: true,
+    credentials: true,
     origin: CLIENT_URL,
   });
 

@@ -27,7 +27,17 @@ export class CustomerService {
   }
 
   async getCart(userId: Types.ObjectId) {
-    return this.findOrCreateCart(userId);
+    await this.findOrCreateCart(userId);
+    return this.cartRepo.findOne({
+      filter: { userId },
+      options: {
+        lean: true,
+        populate: {
+          path: 'items.productId',
+          select: 'name slug price discountPercent stock images createdAt',
+        },
+      },
+    });
   }
 
   async addItem(userId: Types.ObjectId, dto: AddCartItemDto) {

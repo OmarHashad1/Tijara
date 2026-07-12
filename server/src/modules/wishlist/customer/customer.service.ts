@@ -21,7 +21,17 @@ export class CustomerService {
   }
 
   async getWishlist(userId: Types.ObjectId) {
-    return this.findOrCreateWishlist(userId);
+    await this.findOrCreateWishlist(userId);
+    return this.wishlistRepo.findOne({
+      filter: { userId },
+      options: {
+        lean: true,
+        populate: {
+          path: 'productIds',
+          select: 'name slug price discountPercent stock images createdAt',
+        },
+      },
+    });
   }
 
   async addItem(userId: Types.ObjectId, dto: AddWishlistItemDto) {
