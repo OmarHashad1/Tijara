@@ -61,3 +61,4 @@ documents/*
 #Firebase
 *firebase-adminsdk*.json
 
+mcp.json
