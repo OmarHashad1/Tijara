@@ -1,9 +1,9 @@
 import { STORAGE_TYPE } from 'src/common/enums/multer.enum';
 import { IDecodedToken } from './auth.interface';
-import { IUser } from './user.interface';
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { UserDocument } from 'src/models';
 import { ContextType } from '@nestjs/common';
+import { Socket } from 'socket.io';
 
 declare global {
   namespace Express {
@@ -37,3 +37,10 @@ export interface IS3UploadAssets {
 }
 
 export type ctxType = ContextType | 'graphql';
+
+export interface AuthSocket extends Socket {
+  credentials: {
+    user: UserDocument;
+    decoded: IDecodedToken;
+  };
+}

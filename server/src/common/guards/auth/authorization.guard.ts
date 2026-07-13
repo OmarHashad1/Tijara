@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLE } from 'src/common/enums';
-import { ctxType, IUser } from 'src/common/types';
+import { AuthSocket, ctxType, IUser } from 'src/common/types';
 import { type Request } from 'express';
 import { GqlExecutionContext } from '@nestjs/graphql';
 @Injectable()
@@ -21,7 +21,6 @@ export class AuthorizationGuard implements CanActivate {
     );
     if (!allowedRoles)
       throw new InternalServerErrorException('Allowed roles must be provided');
-
     let user: IUser;
     switch (context.getType<ctxType>()) {
       case 'http': {
@@ -34,6 +33,11 @@ export class AuthorizationGuard implements CanActivate {
           GqlExecutionContext.create(context).getContext().req;
 
         user = req.credentials.user;
+        break;
+      }
+      case 'ws': {
+        const client = context.switchToWs().getClient() as AuthSocket;
+        user = client.credentials.user;
         break;
       }
       default:

@@ -14,8 +14,10 @@ import { TOKEN_TYPE } from 'src/common/enums/auth.enum';
 import { UserRepo } from 'src/common/repositories';
 import { UserDocument } from 'src/models';
 import { RedisService } from 'src/common/services/redis';
-import { ctxType } from 'src/common/types';
+import { AuthSocket, ctxType } from 'src/common/types';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { parseCookie } from 'cookie';
+
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
   constructor(
@@ -25,7 +27,7 @@ export class AuthenticationGuard implements CanActivate {
     private readonly redisService: RedisService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    let req: Request;
+    let req: Request | AuthSocket;
     let token: string | null = null;
 
     const type =
@@ -36,7 +38,7 @@ export class AuthenticationGuard implements CanActivate {
 
     switch (context.getType<ctxType>()) {
       case 'http': {
-        req = context.switchToHttp().getRequest();
+        req = context.switchToHttp().getRequest() as Request;
         token =
           type == TOKEN_TYPE.ACCESS
             ? req.cookies.accessToken
@@ -44,20 +46,39 @@ export class AuthenticationGuard implements CanActivate {
         break;
       }
       case 'graphql': {
-        req = GqlExecutionContext.create(context).getContext().req;
+        req = GqlExecutionContext.create(context).getContext().req as Request;
         token =
           type === TOKEN_TYPE.ACCESS
             ? req.cookies.accessToken
             : req.cookies.refreshToken;
         break;
       }
+      case 'ws': {
+        req = context.switchToWs().getClient() as AuthSocket;
+        const rawCookie = req.handshake.headers.cookie;
+        if (!rawCookie) return false;
+        const cookie = parseCookie(rawCookie as string) as unknown as {
+          accessToken: string;
+          refreshToken: string;
+        };
+        token =
+          type == TOKEN_TYPE.ACCESS
+            ? (cookie.accessToken as string)
+            : (cookie.refreshToken as string);
+
+        break;
+      }
       default:
         throw new BadRequestException('Invalid or unsupported protocol');
     }
 
-
     if (!token) return false;
 
+    req.credentials = await this.validateToken(token, type);
+    return true;
+  }
+
+  async validateToken(token: string, type: TOKEN_TYPE)  {
     const decoded = await this.tokenService.decodeToken({
       token,
       type,
@@ -67,11 +88,9 @@ export class AuthenticationGuard implements CanActivate {
       filter: { _id: decoded._id },
       options: { lean: false, paranoId: false },
     });
-
     if (!user) throw new NotFoundException('User not found');
 
     if (user.deletedAt) throw new NotFoundException('User not found');
-
 
     if (
       user.credentialsChangedAt &&
@@ -98,7 +117,6 @@ export class AuthenticationGuard implements CanActivate {
     if (user.status === USER_STATUS.DEACTIVATED)
       throw new BadRequestException('Your account is deactivated');
 
-    req.credentials = { user, decoded };
-    return true;
+    return { user, decoded };
   }
 }

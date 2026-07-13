@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { ctxType } from '../types';
+import { AuthSocket, ctxType } from '../types';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { skipEmailVerificationName } from '../decorators';
 
@@ -22,7 +22,7 @@ export class EmailVerifiedGuard implements CanActivate {
     );
     if (skip) return true;
 
-    let req: Request;
+    let req: Request | AuthSocket;
 
     switch (context.getType<ctxType>()) {
       case 'http': {
@@ -31,6 +31,10 @@ export class EmailVerifiedGuard implements CanActivate {
       }
       case 'graphql': {
         req = GqlExecutionContext.create(context).getContext().req;
+        break;
+      }
+      case 'ws': {
+        req = context.switchToWs().getClient();
         break;
       }
       default:

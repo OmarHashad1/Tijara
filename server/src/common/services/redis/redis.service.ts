@@ -20,6 +20,7 @@ export class RedisService {
       console.log({ err }, 'Redis Error');
     }
   }
+
   public revokedTokenPrefix(userId: string | Types.ObjectId) {
     return `user:${userId}:REVOKED_TOKEN`;
   }
@@ -129,6 +130,34 @@ export class RedisService {
   }
 
   public CahcedKey(value: string, userId: string | null = null): string {
-    return userId ? `REQUEST::${value}::${userId}` : `REQUEST::${value}`;
+    return userId ? `REQUEST:${value}:${userId}` : `REQUEST:${value}`;
+  }
+
+  public socketConnectionkey(userId: string) {
+    return `user:${userId}:SOCKET_CONNECTION`;
+  }
+
+  public async addSocketConn(clientId: string, userId: string) {
+    try {
+      await this.client.sAdd(this.socketConnectionkey(userId), clientId);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  public async removeSocketConn(clientId: string, userId: string) {
+    try {
+      await this.client.sRem(this.socketConnectionkey(userId), clientId);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  public async socketConnCount(userId: string): Promise<number> {
+    try {
+      return await this.client.sCard(this.socketConnectionkey(userId));
+    } catch (err) {
+      throw err;
+    }
   }
 }
