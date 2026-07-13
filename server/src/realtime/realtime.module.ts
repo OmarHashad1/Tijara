@@ -5,7 +5,8 @@ import { UserModule } from 'src/modules/user/user.module';
 import { AuthenticationGuard } from 'src/common/guards/auth';
 
 @Module({
-  imports:[UserModule],
-  providers: [RealtimeGateway,AuthenticationGuard],
+  imports: [UserModule],
+  exports: [RealtimeGateway],
+  providers: [RealtimeGateway, AuthenticationGuard],
 })
 export class RealtimeModule {}

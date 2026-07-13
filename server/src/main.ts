@@ -32,7 +32,7 @@ async function bootstrap() {
   );
   app.use(cookieParser());
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+ app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

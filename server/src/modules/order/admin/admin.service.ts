@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Types } from 'mongoose';
 import { OrderRepo } from 'src/common/repositories/order.repo';
 import { ProductRepo } from 'src/common/repositories/product.repo';
@@ -8,6 +12,7 @@ import { EMAIL_EVENTS } from 'src/common/enums/email.enums';
 import { emailEmitter } from 'src/common/events/email.event';
 import { ListAdminOrdersQueryDto } from '../dto/list-admin-orders-query.dto';
 import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 
 @Injectable()
 export class AdminService {
@@ -15,6 +20,7 @@ export class AdminService {
     private readonly orderRepo: OrderRepo,
     private readonly productRepo: ProductRepo,
     private readonly userRepo: UserRepo,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async listOrders(query: ListAdminOrdersQueryDto) {
@@ -80,6 +86,8 @@ export class AdminService {
         status: dto.status,
       });
     }
+
+    this.realtimeGateway.handleOrderStatusUpdate(order);
 
     return this.orderRepo.findOne({
       filter: { _id: id },

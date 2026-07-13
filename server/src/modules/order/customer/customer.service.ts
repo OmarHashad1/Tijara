@@ -1,3 +1,4 @@
+import { RealtimeGateway } from './../../../realtime/realtime.gateway';
 import { S3Service } from 'src/common/services/aws';
 import {
   BadRequestException,
@@ -43,6 +44,7 @@ export class CustomerService {
     private readonly s3Service: S3Service,
     private readonly couponRepo: CouponRepo,
     private readonly userRepo: UserRepo,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async checkout(user: UserDocument, dto: CheckoutDto) {
@@ -193,6 +195,7 @@ export class CustomerService {
         orderId: order._id.toString(),
         total: order.total,
       });
+      this.realtimeGateway.handleNewOrder(order);
 
       return {
         order,
@@ -236,6 +239,8 @@ export class CustomerService {
         transactionRef: session.id,
       },
     });
+
+    this.realtimeGateway.handleNewOrder(order);
 
     return {
       order,
@@ -405,6 +410,8 @@ export class CustomerService {
           });
         }
 
+        this.realtimeGateway.handleOrderStatusUpdate(order);
+
         return;
       }
       case 'payment_intent.payment_failed':
@@ -448,6 +455,7 @@ export class CustomerService {
             orderId,
           });
         }
+        this.realtimeGateway.handleOrderStatusUpdate(order);
 
         return;
       }
@@ -489,6 +497,7 @@ export class CustomerService {
             orderId,
           });
         }
+        this.realtimeGateway.handleOrderStatusUpdate(order);
 
         return;
       }
