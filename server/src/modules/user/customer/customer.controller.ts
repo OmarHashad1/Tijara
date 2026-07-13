@@ -22,13 +22,13 @@ import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import { AddAddressDto } from '../dto/add-address.dto';
 import { UpdateAddressDto } from '../dto/update-address.dto';
-import { AddPaymentMethodDto } from '../dto/add-payment-method.dto';
 
 @Controller('user')
 @Auth([ROLE.USER])
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
+  @Auth([ROLE.ADMIN, ROLE.USER])
   @Get('/me')
   profile(@User() user: IUser) {
     return { message: 'User profile fetched successfully', data: user };
@@ -82,33 +82,6 @@ export class CustomerController {
   async deleteAddress(@User() user: UserDocument, @Param('id') id: string) {
     await this.customerService.deleteAddress(user._id, new Types.ObjectId(id));
     return { message: 'Address deleted successfully' };
-  }
-
-  @Get('/me/payment-methods')
-  async getPaymentMethods(@User() user: UserDocument) {
-    const methods = await this.customerService.getPaymentMethods(user._id);
-    return { message: 'Payment methods fetched successfully', data: methods };
-  }
-
-  @Post('/me/payment-methods')
-  async addPaymentMethod(
-    @User() user: UserDocument,
-    @Body() dto: AddPaymentMethodDto,
-  ) {
-    await this.customerService.addPaymentMethod(user._id, dto);
-    return { message: 'Payment method added successfully' };
-  }
-
-  @Delete('/me/payment-methods/:id')
-  async deletePaymentMethod(
-    @User() user: UserDocument,
-    @Param('id') id: string,
-  ) {
-    await this.customerService.deletePaymentMethod(
-      user._id,
-      new Types.ObjectId(id),
-    );
-    return { message: 'Payment method removed successfully' };
   }
 
   @Delete('/me')

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { listBrands } from "@/lib/api/catalog";
 import { Reveal } from "@/components/reveal";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function BrandsPage() {
   const { data: brands, isPending } = useQuery({
@@ -37,9 +38,12 @@ export default function BrandsPage() {
                 className="group flex h-full flex-col justify-between rounded-lg border border-hairline-light bg-canvas-light p-7 transition-all duration-200 hover:border-ink hover:shadow-card-hover"
               >
                 <div>
-                  <h2 className="type-heading-lg">{brand.name}</h2>
+                  <div className="mb-5 flex items-center gap-4">
+                    <BrandLogo logo={brand.logo} name={brand.name} />
+                    <h2 className="type-heading-lg">{brand.name}</h2>
+                  </div>
                   {brand.description && (
-                    <p className="type-caption mt-2 line-clamp-2 text-shade-50">
+                    <p className="type-caption line-clamp-2 text-shade-50">
                       {brand.description}
                     </p>
                   )}

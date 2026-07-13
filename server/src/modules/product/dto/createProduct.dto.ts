@@ -35,11 +35,10 @@ export class CreateProductDto {
   @Max(100)
   discountPercent?: number;
 
-  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  stock?: number;
+  stock!: number;
 
   @IsMongoId()
   categoryId!: string;

@@ -18,6 +18,14 @@ export class AdminService {
     private readonly brandRepo: BrandRepo,
   ) {}
 
+  async listAllCategories() {
+    return this.categoryRepo.find({
+      filter: {},
+      projection: { _id: 1, name: 1, slug: 1, status: 1 },
+      options: { lean: false },
+    });
+  }
+
   async createCategory(dto: CreateCategoryDto) {
     const { name, status = CATEGORY_STATUS.DRAFT } = dto;
     const categoryExists = await this.categoryRepo.findOne({

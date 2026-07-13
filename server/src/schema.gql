@@ -56,6 +56,7 @@ type PaginatedProducts {
 }
 
 type Query {
+  allCategories: [CategoryEntity!]!
   categories: [CategoryEntity!]!
   category(slug: String!): CategoryWithBrands!
   listProducts(query: ListProductQueryInput): PaginatedProducts!

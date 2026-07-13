@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { checkout, validateCoupon } from "@/lib/api/orders";
-import { listAddresses, listPaymentMethods } from "@/lib/api/account";
+import { listAddresses } from "@/lib/api/account";
 import { apiErrorMessage } from "@/lib/api/client";
 import type { Coupon, PaymentProvider } from "@/lib/api/types";
 import { formatPrice, salePriceOf } from "@/lib/format";
@@ -38,12 +38,6 @@ export default function CheckoutPage() {
     queryFn: listAddresses,
     enabled: isLoggedIn,
   });
-  const { data: paymentMethods } = useQuery({
-    queryKey: ["payment-methods"],
-    queryFn: listPaymentMethods,
-    enabled: isLoggedIn,
-  });
-
   const couponMutation = useMutation({
     mutationFn: validateCoupon,
     onSuccess: (validated) => {
@@ -109,6 +103,11 @@ export default function CheckoutPage() {
     0,
   );
   const total = discountedTotal(subtotal, coupon);
+  const effectiveAddressId =
+    selectedAddressId ??
+    addresses?.find((address) => address.isDefault)?._id ??
+    addresses?.[0]?._id ??
+    null;
 
   return (
     <div className="mx-auto max-w-300 px-6 py-12 md:py-16">
@@ -116,8 +115,7 @@ export default function CheckoutPage() {
 
       <div className="grid gap-12 lg:grid-cols-[1fr_420px]">
         <div className="space-y-10">
-          {/* Shipping address — confirmation only; the order API doesn't take
-              an addressId yet (backend gap, flagged rather than invented). */}
+          {/* Shipping address — required by POST /orders (addressId). */}
           <section>
             <h2 className="type-heading-md mb-4">Shipping address</h2>
             {!addresses?.length ? (
@@ -195,9 +193,6 @@ export default function CheckoutPage() {
                 <p className="type-body-strong">Card (Stripe)</p>
                 <p className="type-caption text-shade-50">
                   You&apos;ll be redirected to a secure payment page.
-                  {paymentMethods?.length
-                    ? ` ${paymentMethods.length} saved card${paymentMethods.length > 1 ? "s" : ""} on file.`
-                    : ""}
                 </p>
               </button>
             </div>
@@ -290,16 +285,22 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {!effectiveAddressId && (
+            <p className="type-caption mt-6 text-shade-50">
+              Select a shipping address to place the order.
+            </p>
+          )}
           <button
             type="button"
-            disabled={checkoutMutation.isPending}
+            disabled={checkoutMutation.isPending || !effectiveAddressId}
             onClick={() =>
               checkoutMutation.mutate({
+                addressId: effectiveAddressId!,
                 provider,
                 couponCode: coupon?.code,
               })
             }
-            className="btn-pill btn-primary mt-6 w-full"
+            className="btn-pill btn-primary mt-2 w-full"
           >
             {checkoutMutation.isPending ? (
               <Spinner />

@@ -9,6 +9,7 @@ import type {
 } from "./types";
 
 export async function checkout(input: {
+  addressId: string;
   couponCode?: string;
   provider: PaymentProvider;
 }): Promise<CheckoutResult> {

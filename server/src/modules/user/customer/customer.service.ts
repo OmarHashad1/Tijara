@@ -9,7 +9,6 @@ import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import { AddAddressDto } from '../dto/add-address.dto';
 import { UpdateAddressDto } from '../dto/update-address.dto';
-import { AddPaymentMethodDto } from '../dto/add-payment-method.dto';
 
 @Injectable()
 export class CustomerService {
@@ -145,28 +144,6 @@ export class CustomerService {
     });
   }
 
-  async getPaymentMethods(userId: Types.ObjectId) {
-    const user = await this.userRepo.findOne({
-      filter: { _id: userId },
-      projection: { paymentsMethod: 1 },
-      options: { lean: true },
-    });
-    return user?.paymentsMethod ?? [];
-  }
-
-  async addPaymentMethod(userId: Types.ObjectId, dto: AddPaymentMethodDto) {
-    if (dto.isDefault) {
-      await this.userRepo.updateOne({
-        filter: { _id: userId },
-        update: { $set: { 'paymentsMethod.$[].isDefault': false } },
-      });
-    }
-    await this.userRepo.updateOne({
-      filter: { _id: userId },
-      update: { $push: { paymentsMethod: dto } },
-    });
-  }
-
   async deleteAccount(userId: Types.ObjectId) {
     const now = new Date();
     await this.userRepo.updateOne({
@@ -175,10 +152,4 @@ export class CustomerService {
     });
   }
 
-  async deletePaymentMethod(userId: Types.ObjectId, paymentId: Types.ObjectId) {
-    await this.userRepo.updateOne({
-      filter: { _id: userId },
-      update: { $pull: { paymentsMethod: { _id: paymentId } } },
-    });
-  }
 }

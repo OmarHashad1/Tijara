@@ -9,6 +9,11 @@ export interface IOrderItem {
   quantity: number;
 }
 
+export interface IShippingAddress {
+  city: string;
+  country: string;
+}
+
 export interface IOrder {
   _id?: Types.ObjectId;
   userId: Types.ObjectId;
@@ -17,6 +22,7 @@ export interface IOrder {
   total: number;
   intentId?: string;
   paymentMethod: PAYMENT_PROVIDER;
+  shippingAddress?: IShippingAddress | null;
   paidAt?: Date | null;
   refundedAt?: Date | null;
   status: ORDER_STATUS;

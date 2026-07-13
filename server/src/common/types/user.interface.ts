@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { PAYMENT_METHOD, ROLE } from 'src/common/enums';
+import { ROLE } from 'src/common/enums';
 
 export interface IUserLocation {
   city?: string | null;
@@ -7,14 +7,9 @@ export interface IUserLocation {
 }
 
 export interface IUserAddress {
+  _id?: Types.ObjectId;
   city: string;
   country: string;
-  isDefault: boolean;
-}
-
-export interface IUseraPayment {
-  method: PAYMENT_METHOD;
-  last4: number;
   isDefault: boolean;
 }
 
@@ -31,7 +26,6 @@ export interface IUser {
   credentialsChangedAt: Date | null;
   createdAt?: Date;
   addresses?: IUserAddress[] | null;
-  paymentsMethod?: IUseraPayment[] | null;
   updatedAt?: Date;
   deletedAt: Date | null;
   restoredAt: Date | null;

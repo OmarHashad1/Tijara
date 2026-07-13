@@ -1,6 +1,4 @@
-/** Shapes returned by the Tijara backend (see documents/openapi.yaml). */
 
-/** Global HTTP envelope added by the backend's response interceptor. */
 export interface ApiEnvelope<T> {
   status: "success";
   data: {
@@ -129,6 +127,7 @@ export interface Order {
   couponCode?: string | null;
   total: number;
   paymentMethod: PaymentProvider;
+  shippingAddress?: { city: string; country: string } | null;
   status: OrderStatus;
   paidAt?: string | null;
   createdAt: string;
@@ -155,13 +154,6 @@ export interface Address {
   _id: string;
   city: string;
   country: string;
-  isDefault?: boolean;
-}
-
-export interface PaymentMethod {
-  _id: string;
-  method: "card" | "POD";
-  last4: number;
   isDefault?: boolean;
 }
 

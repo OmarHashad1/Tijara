@@ -7,9 +7,9 @@ import {
 } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { SecurityService } from 'src/common/services/security';
-import { PAYMENT_METHOD, ROLE, USER_STATUS } from 'src/common/enums';
+import { ROLE, USER_STATUS } from 'src/common/enums';
 
-import type { IUser, IUserAddress, IUseraPayment } from 'src/common/types';
+import type { IUser, IUserAddress } from 'src/common/types';
 
 export type UserDocument = HydratedDocument<IUser>;
 
@@ -90,16 +90,6 @@ export class User implements IUser {
   })
   addresses?: IUserAddress[] | null | undefined;
 
-  @Prop({
-    type: [
-      {
-        method: { type: { enum: [...Object.values(PAYMENT_METHOD)] } },
-        last4: Number,
-        isDefault: Boolean,
-      },
-    ],
-  })
-  paymentsMethod?: IUseraPayment[] | null | undefined;
   @Prop({
     type: String,
     enum: [...Object.values(USER_STATUS)],

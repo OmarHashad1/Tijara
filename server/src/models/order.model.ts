@@ -2,7 +2,7 @@ import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { ORDER_STATUS, PAYMENT_PROVIDER } from 'src/common/enums';
 
-import type { IOrder, IOrderItem } from 'src/common/types';
+import type { IOrder, IOrderItem, IShippingAddress } from 'src/common/types';
 
 export type OrderDocument = HydratedDocument<IOrder>;
 
@@ -55,6 +55,13 @@ export class Order implements IOrder {
     required: true,
   })
   paymentMethod!: PAYMENT_PROVIDER;
+
+  @Prop({
+    type: { city: String, country: String },
+    _id: false,
+    default: null,
+  })
+  shippingAddress?: IShippingAddress | null;
 
   @Prop({ type: Date, default: null })
   paidAt!: Date | null;

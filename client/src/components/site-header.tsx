@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Heart, ShoppingBag, UserRound } from "lucide-react";
+import { Heart, LayoutDashboard, ShoppingBag, UserRound } from "lucide-react";
 import { Spinner } from "./spinner";
 import { Wordmark } from "./wordmark";
 import { useUser, useLogout } from "@/lib/hooks/use-user";
@@ -39,7 +39,17 @@ function AccountMenu() {
             className="fixed inset-0 z-40 cursor-default"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 z-50 mt-2 w-44 rounded-lg border border-hairline-light bg-canvas-light py-2 shadow-elev-4">
+          <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-hairline-light bg-canvas-light py-2 shadow-elev-4">
+            {user.role === "admin" && (
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className="type-caption mx-2 mb-1 flex items-center gap-2 rounded-full bg-aloe px-3 py-2 text-ink hover:bg-pistachio"
+              >
+                <LayoutDashboard strokeWidth={1.5} className="h-4 w-4" />
+                Admin dashboard
+              </Link>
+            )}
             {[
               { label: "Account", href: "/account" },
               { label: "Orders", href: "/orders" },

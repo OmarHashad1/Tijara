@@ -169,6 +169,8 @@ export default function OrderDetailPage() {
             })}{" "}
             ·{" "}
             {order.paymentMethod === "stripe" ? "Card" : "Cash on delivery"}
+            {order.shippingAddress &&
+              ` · Ships to ${order.shippingAddress.city}, ${order.shippingAddress.country}`}
           </p>
         </div>
         <OrderStatusBadge status={order.status} />

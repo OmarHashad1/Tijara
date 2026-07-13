@@ -7,6 +7,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getBrand, listProducts } from "@/lib/api/catalog";
 import { ProductCard } from "@/components/product-card";
 import { CatalogPagination } from "@/components/catalog/catalog-pagination";
+import { BrandLogo } from "@/components/brand-logo";
 
 const PAGE_SIZE = 12;
 
@@ -58,7 +59,10 @@ export default function BrandPage() {
           <div className="h-12 w-64 animate-pulse rounded bg-canvas-cream" />
         ) : (
           <>
-            <h1 className="type-display-lg">{brand.name}</h1>
+            <div className="flex items-center gap-6">
+              <BrandLogo logo={brand.logo} name={brand.name} className="h-20 w-20" />
+              <h1 className="type-display-lg">{brand.name}</h1>
+            </div>
             {brand.description && (
               <p className="type-body-md mt-4 max-w-xl text-shade-50">
                 {brand.description}

@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 import { Auth } from 'src/common/decorators';
 import { ROLE } from 'src/common/enums';
@@ -10,6 +10,12 @@ import { UpdateCategoryInput } from '../dto/updateCategory.dto';
 @Resolver()
 export class AdminResolver {
   constructor(private readonly adminService: AdminService) {}
+
+  @Auth([ROLE.ADMIN])
+  @Query((returns) => [CategoryEntity])
+  async allCategories() {
+    return this.adminService.listAllCategories();
+  }
 
   @Auth([ROLE.ADMIN])
   @Mutation((returns) => CategoryEntity)

@@ -82,6 +82,43 @@ button:not(:disabled),
   cursor: pointer;
 }
 
+/*
+  Toasts wear the design system (pill, elev-4, aloe success / ink error /
+  pistachio info — no alarm red). Plain CSS with data-type selectors so
+  variant precedence is deterministic, unlike stacked utility classes.
+*/
+html [data-sonner-toast][data-styled="true"] {
+  border-radius: 9999px;
+  width: fit-content;
+  padding: 14px 22px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.28px;
+  border: 1px solid var(--color-hairline-light);
+  background: var(--color-canvas-light);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-elev-4);
+}
+html [data-sonner-toast][data-type="success"] {
+  background: var(--color-aloe);
+  border-color: var(--color-aloe);
+  color: var(--color-ink);
+}
+html [data-sonner-toast][data-type="error"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-on-primary);
+}
+html [data-sonner-toast][data-type="info"] {
+  background: var(--color-pistachio);
+  border-color: var(--color-pistachio);
+  color: var(--color-ink);
+}
+html [data-sonner-toast] [data-icon] {
+  color: currentColor;
+}
+
 ::selection {
   background: var(--color-aloe);
   color: var(--color-ink);

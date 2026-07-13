@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { label: "Profile", href: "/account" },
   { label: "Addresses", href: "/account/addresses" },
-  { label: "Payment methods", href: "/account/payment-methods" },
 ];
 
 export default function AccountLayout({

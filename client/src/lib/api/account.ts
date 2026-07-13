@@ -1,5 +1,5 @@
 import { api, unwrap } from "./client";
-import type { Address, PaymentMethod } from "./types";
+import type { Address } from "./types";
 
 /* ---- Profile ---- */
 
@@ -49,23 +49,4 @@ export async function updateAddress(input: {
 
 export async function deleteAddress(addressId: string) {
   await api.delete(`/user/me/addresses/${addressId}`);
-}
-
-/* ---- Payment methods ---- */
-
-export async function listPaymentMethods(): Promise<PaymentMethod[]> {
-  const res = await api.get("/user/me/payment-methods");
-  return unwrap<PaymentMethod[]>(res.data);
-}
-
-export async function addPaymentMethod(input: {
-  method: "card" | "POD";
-  last4: number;
-  isDefault?: boolean;
-}) {
-  await api.post("/user/me/payment-methods", input);
-}
-
-export async function deletePaymentMethod(paymentMethodId: string) {
-  await api.delete(`/user/me/payment-methods/${paymentMethodId}`);
 }

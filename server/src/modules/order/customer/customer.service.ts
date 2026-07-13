@@ -65,6 +65,14 @@ export class CustomerService {
       );
     }
 
+    const shippingAddress = user.addresses?.find(
+      (address) => address._id?.toString() === dto.addressId,
+    );
+    if (!shippingAddress)
+      throw new NotFoundException(
+        'Shipping address not found — add one to your profile first',
+      );
+
     const cart = await this.cartRepo.findOne({
       filter: { userId: user._id },
       options: { lean: true, populate: { path: 'items.productId' } },
@@ -153,6 +161,10 @@ export class CustomerService {
         userId: user._id,
         items: orderItems,
         couponCode: dto.couponCode ?? null,
+        shippingAddress: {
+          city: shippingAddress.city,
+          country: shippingAddress.country,
+        },
         total: Math.round(total * 100) / 100,
         paymentMethod,
         status: ORDER_STATUS.PENDING,
