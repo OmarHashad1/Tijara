@@ -1,0 +1,15 @@
+
+services:
+  tijara-prod:
+    container_name: tijara-dev-prod
+    build: 
+      context: .
+      target: prod
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env.production
+    command: npm run start:prod
+
+

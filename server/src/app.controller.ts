@@ -10,7 +10,7 @@ export class AppController {
   @TTL(10)
   @UseInterceptors(RedisCacheInterceptor)
   @Get()
-  getHello(): number {
-    return Date.now();
+  getHello(): string {
+    return this.appService.getHello();
   }
 }

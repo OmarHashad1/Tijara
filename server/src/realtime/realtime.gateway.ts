@@ -106,7 +106,7 @@ export class RealtimeGateway
 
   @SubscribeMessage('order-status-update')
   handleOrderStatusUpdate(order: OrderDocument | FlattenMaps<IOrder>) {
-    this.server.to(order.userId.toString()).emit('order-status-changes', {
+    this.server.to(order.userId.toString()).emit('order-status-update', {
       message: `order ${order._id} status has been updated`,
       stauts: order.status,
     });

@@ -1,0 +1,23 @@
+
+services:
+  tijara-dev:
+    container_name: tijara-dev-con
+    build: 
+      context: .
+      target: dev
+      dockerfile: Dockerfile
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /tijara-app
+          ignore: node_modules
+        - action: rebuild
+          path: ./package.json
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.development
+    command: npm run start:dev
+
+
