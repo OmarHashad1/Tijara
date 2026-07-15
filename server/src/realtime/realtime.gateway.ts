@@ -28,12 +28,10 @@ import { ROLE } from 'src/common/enums';
 import { type OrderDocument } from 'src/models';
 import { FlattenMaps } from 'mongoose';
 
-@WebSocketGateway({
-  cors: { origin: '*', credentials: true },
-})
+@WebSocketGateway()
 @UseFilters(WsExceptionFilter)
 export class RealtimeGateway
-  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+  implements OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
     private readonly authGuard: AuthenticationGuard,
@@ -42,9 +40,6 @@ export class RealtimeGateway
   @WebSocketServer()
   server!: Server;
 
-  afterInit() {
-    console.log('Gateway is running');
-  }
 
   async handleConnection(client: AuthSocket) {
     try {
@@ -62,7 +57,6 @@ export class RealtimeGateway
         client.credentials.decoded._id,
       );
     } catch (err: any) {
-      console.log(err);
       client.emit(
         'custom_error',
         err.message ?? 'Forbidden: invalid or expired token',
@@ -81,18 +75,6 @@ export class RealtimeGateway
       if (remaining < 1) this.server.emit('user_offline', { userId });
     } catch (err: any) {
       client.emit('custom_error', err.message ?? 'Unexpected error occured');
-    }
-  }
-
-  @Auth([ROLE.USER])
-  @SubscribeMessage('events')
-  events(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
-    try {
-      client.emit('events', 'hello');
-    } catch (err: any) {
-      console.log(err);
-      client.emit('custom_error', err.message ?? 'error');
-      throw new BadGatewayException(err.message);
     }
   }
 

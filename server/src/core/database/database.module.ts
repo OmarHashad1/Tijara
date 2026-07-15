@@ -24,7 +24,6 @@ import { createClient } from 'redis';
 
         await client.connect();
         client.on('error', (err) => {
-          console.log(err);
         });
 
         return client;

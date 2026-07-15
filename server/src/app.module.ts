@@ -44,7 +44,6 @@ import { RealtimeModule } from './realtime/realtime.module';
     CacheModule.register({ isGlobal: true, ttl: 10000 }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      graphiql: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
     }),

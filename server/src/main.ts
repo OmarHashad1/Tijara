@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { ResponseInterceptor, TimeoutInterceptor } from './common/interceptors';
 import { raw, Request, Response } from 'express';
 import { HttpExceptionFilter } from './common/filters';
+import { SocketIOAdapter } from './realtime/socket.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,7 @@ async function bootstrap() {
     credentials: true,
     origin: CLIENT_URL,
   });
+  app.useWebSocketAdapter(new SocketIOAdapter(app));
 
   app.use('/orders/webhook', raw({ type: 'application/json' }));
   app.getHttpAdapter().get('/health', (_req: Request, res: Response) => {
