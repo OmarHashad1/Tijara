@@ -22,6 +22,8 @@ Tijara is the backend of a fullstack e-commerce project, built with NestJS. It e
 | 📦 File storage | AWS S3 |
 | ✉️ Email | Nodemailer |
 | ✅ Validation | class-validator, Zod |
+| 🔌 Real-time | WebSockets (Socket.IO) |
+| 🐳 Containers | Docker (dev/build/prod multi-stage) |
 
 ## ✨ Features
 
@@ -31,7 +33,8 @@ Tijara is the backend of a fullstack e-commerce project, built with NestJS. It e
 - 📦 Checkout and order management (Stripe integration)
 - 🎟️ Coupons
 - ⭐ Product reviews
-- 👤 User accounts (profile, addresses, payment methods) and admin management
+- 👤 User accounts (profile, addresses) and admin management
+- 🔔 Real-time order and presence updates via WebSockets
 
 ## ⚙️ Project setup
 
@@ -50,6 +53,18 @@ npm run start:dev
 
 # production
 npm run start:prod
+```
+
+## 🐳 Docker
+
+Requires `server/.env.development` or `server/.env.production` (see `env_file` in the compose files).
+
+```bash
+# development (live source sync, watch mode)
+docker compose -f server/docker-compose-dev.yaml up --build
+
+# production (compiled dist/, production dependencies only)
+docker compose -f server/docker-compose-prod.yaml up --build
 ```
 
 ## 🧪 Tests
